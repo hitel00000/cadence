@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Chord Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --surface3: #28282f;
+    --border: #2e2e38;
+    --accent: #e8c547;
+    --accent2: #c4a030;
+    --text: #e8e8f0;
+    --text2: #9090a8;
+    --text3: #606070;
+    --red: #e85447;
+    --green: #47c47a;
+    --blue: #4788e8;
+    --beat-active: #e8c547;
+    --slot-w: 140px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ─── Header ─── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: var(--text2); font-size: 13px; font-family: 'Space Mono', monospace; margin-left: 10px; }
+
+  /* ─── Main layout ─── */
+  .main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+  }
+
+  /* ─── Score area ─── */
+  .score-wrap {
+    flex: 1;
+    padding: 24px 28px;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  .section {
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .section-label {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .measures-row {
+    display: flex;
+    gap: 3px;
+    align-items: stretch;
+  }
+  .measure {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 8px 8px;
+    width: 300px;
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .measure.playing {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(232,197,71,0.12);
+  }
+  .measure-num {
+    font-size: 9px;
+    color: var(--text3);
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    letter-spacing: 0.08em;
+  }
+  .beats-row {
+    display: flex;
+    gap: 3px;
+    margin-top: 10px;
+  }
+  .beat-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--surface3);
+    transition: background 0.08s;
+  }
+  .beat-dot.active { background: var(--beat-active); }
+  .slots-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .chord-slot {
+    flex: 1;
+    min-height: 68px;
+    background: var(--surface2);
+    border: 1.5px dashed var(--border);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .chord-slot:hover { border-color: var(--accent2); background: var(--surface3); }
+  .chord-slot.filled { border-style: solid; border-color: var(--surface3); }
+  .chord-slot.filled:hover { border-color: var(--accent); }
+  .chord-slot.active-beat {
+    background: rgba(232,197,71,0.08);
+    border-color: var(--accent);
+  }
+  .chord-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--text);
+    line-height: 1;
+    text-align: center;
+  }
+  .chord-quality {
+    font-size: 9px;
+    color: var(--text2);
+    margin-top: 3px;
+    letter-spacing: 0.06em;
+  }
+  .chord-stroke {
+    font-size: 8px;
+    color: var(--accent2);
+    margin-top: 2px;
+  }
+  .slot-empty-hint {
+    font-size: 18px;
+    color: var(--text3);
+    line-height: 1;
+  }
+  .slot-clear {
+    position: absolute;
+    top: 3px; right: 4px;
+    font-size: 10px;
+    color: var(--text3);
+    cursor: pointer;
+    display: none;
+    z-index: 2;
+  }
+  .chord-slot.filled:hover .slot-clear { display: block; }
+  .slot-clear:hover { color: var(--red); }
+
+  .add-section-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: 1.5px dashed var(--border);
+    color: var(--text3);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-section-btn:hover { border-color: var(--accent2); color: var(--accent); }
+
+  /* ─── Right sidebar: chord builder + transport ─── */
+  .sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-title {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Chord preview */
+  .chord-preview {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    margin-bottom: 14px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .preview-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 30px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .preview-sub {
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Button groups */
+  .btn-group {
+    margin-bottom: 10px;
+  }
+  .group-label {
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    margin-bottom: 5px;
+  }
+  .btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .opt-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 5px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .opt-btn:hover { border-color: var(--accent2); color: var(--text); }
+  .opt-btn.selected { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+  .apply-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: background 0.12s;
+    margin-top: 6px;
+  }
+  .apply-btn:hover { background: var(--accent2); }
+  .apply-btn:disabled { background: var(--surface3); color: var(--text3); cursor: default; }
+
+  /* ─── Transport ─── */
+  .transport {
+    padding: 16px 18px;
+  }
+
+  .bpm-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .bpm-label { font-size: 10px; color: var(--text3); flex-shrink: 0; }
+  .bpm-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    width: 70px;
+    text-align: center;
+    padding: 4px;
+    border-radius: 4px;
+    outline: none;
+  }
+  .bpm-input:focus { border-color: var(--accent); }
+  input[type=range].bpm-slider {
+    flex: 1;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .pos-display {
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 10px;
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+  .pos-display span { color: var(--accent); }
+
+  /* Seek bar */
+  .seek-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .seek-bar-wrap {
+    flex: 1;
+    position: relative;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .seek-progress {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    pointer-events: none;
+    transition: width 0.05s linear;
+  }
+  .seek-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .seek-btn:hover { border-color: var(--accent2); color: var(--accent); }
+
+  .transport-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .t-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 18px;
+    width: 46px; height: 46px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .t-btn:hover { border-color: var(--accent2); color: var(--accent); }
+  .t-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    width: 56px; height: 56px;
+    font-size: 22px;
+    border-radius: 50%;
+  }
+  .t-btn.primary:hover { background: var(--accent2); }
+  .t-btn.stop-btn { font-size: 14px; }
+
+  /* Loop toggle */
+  .loop-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .loop-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.12s;
+  }
+  .loop-toggle.on { border-color: var(--accent2); color: var(--accent); }
+
+  /* Fretboard mini-viz */
+  .fret-canvas { display: block; margin: 0 auto; }
+
+  /* Modal overlay */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    width: 340px;
+    max-width: 96vw;
+  }
+  .modal-title {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .modal-chord-preview {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: background 0.12s;
+  }
+  .modal-btn.confirm { background: var(--accent); color: #000; }
+  .modal-btn.confirm:hover { background: var(--accent2); }
+  .modal-btn.cancel { background: var(--surface3); color: var(--text2); }
+  .modal-btn.cancel:hover { background: var(--border); color: var(--text); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  @media (max-width: 900px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      height: 100vh;
+      width: min(360px, 92vw);
+      z-index: 60;
+      transition: right 0.2s ease;
+      box-shadow: -8px 0 20px rgba(0,0,0,0.35);
+    }
+    .sidebar.open { right: 0; }
+    .sidebar-close {
+      display:block;
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:var(--surface2);
+      border:1px solid var(--border);
+      color:var(--text);
+      border-radius:6px;
+      width:36px;height:36px;
+    }
+  }
+
+
+.hold-hint{
+  font-size:18px;
+  color: var(--accent2);
+}
+.slot-mode-toggle{
+  position:absolute;
+  bottom:4px;
+  right:4px;
+  font-size:9px;
+  color:var(--text3);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Guitar Chord Player <span>4/4 · 2 beats/slot</span></div>
+</header>
+
+<div id="sidebarBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55"></div><div class="main">
+  <!-- Score -->
+  <div class="score-wrap" id="scoreWrap">
+    <!-- sections rendered by JS -->
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar"><button class="sidebar-close" id="sidebarClose">✕</button>
+    <!-- Chord Builder -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Chord Builder</div>
+      <div class="chord-preview">
+        <div class="preview-name" id="previewName">—</div>
+        <div class="preview-sub" id="previewSub">슬롯을 클릭해서 코드를 입력하세요</div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Root</div>
+        <div class="btn-row" id="rootBtns"></div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Quality</div>
+        <div class="btn-row" id="qualityBtns"></div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Tension</div>
+        <div class="btn-row" id="tensionBtns"></div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Extension</div>
+        <div class="btn-row" id="extBtns"></div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Stroke</div>
+        <div class="btn-row" id="strokeBtns"></div>
+      </div>
+
+      <div class="btn-group">
+        <div class="group-label">Bass Note (on X)</div>
+        <div class="btn-row" id="bassBtns"></div>
+      </div>
+
+      <button class="apply-btn" id="applyBtn" disabled>슬롯 선택 후 적용</button>
+    </div>
+
+    <!-- Fretboard -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Voicing</div>
+      <canvas class="fret-canvas" id="fretCanvas" width="260" height="120"></canvas>
+    </div>
+
+    <!-- Transport -->
+    <div class="transport">
+      <div class="sidebar-title">Transport</div>
+
+      <div class="bpm-row">
+        <span class="bpm-label">BPM</span>
+        <input class="bpm-input" id="bpmInput" type="number" min="40" max="240" value="80">
+        <input class="bpm-slider" type="range" id="bpmSlider" min="40" max="240" value="80">
+      </div>
+
+      <div class="pos-display" id="posDisplay">Section <span id="posSection">1</span> · Bar <span id="posBar">1</span> · Beat <span id="posBeat">1</span></div>
+
+      <div class="seek-row">
+        <button class="seek-btn" id="seekPrev">◀ Bar</button>
+        <div class="seek-bar-wrap" id="seekBarWrap">
+          <div class="seek-progress" id="seekProgress" style="width:0%"></div>
+        </div>
+        <button class="seek-btn" id="seekNext">Bar ▶</button>
+      </div>
+
+      <div class="transport-btns">
+        <button class="t-btn stop-btn" id="stopBtn" title="Stop">■</button>
+        <button class="t-btn primary" id="playPauseBtn" title="Play">▶</button>
+        <button class="t-btn" id="loopBarBtn" title="Loop" style="font-size:12px">⟳</button>
+      </div>
+
+      <div class="loop-row">
+        <button class="loop-toggle" id="loopToggle">LOOP OFF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chord edit modal (mobile-friendly alternative) -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">코드 확인</div>
+    <div class="modal-chord-preview" id="modalChordPreview">—</div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modalCancelBtn">취소</button>
+      <button class="modal-btn confirm" id="modalConfirmBtn">적용</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────
+//  DATA
+// ──────────────────────────────────────────────
+const ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ROOT_DISPLAY = {
+  'C':'C','C#':'C♯','D':'D','D#':'D♯','E':'E',
+  'F':'F','F#':'F♯','G':'G','G#':'G♯','A':'A','A#':'A♯','B':'B'
+};
+
+const QUALITIES = [
+  { id:'maj',  label:'Major',  sym:'' },
+  { id:'min',  label:'Minor',  sym:'m' },
+  { id:'dim',  label:'Dim',    sym:'dim' },
+  { id:'aug',  label:'Aug',    sym:'aug' },
+];
+
+const TENSIONS = [
+  { id:'',    label:'none' },
+  { id:'7',   label:'7' },
+  { id:'maj7',label:'M7' },
+  { id:'9',   label:'9' },
+  { id:'maj9',label:'M9' },
+  { id:'11',  label:'11' },
+  { id:'13',  label:'13' },
+  { id:'6',   label:'6' },
+];
+
+const EXTENSIONS = [
+  { id:'',       label:'—' },
+  { id:'sus2',   label:'sus2' },
+  { id:'sus4',   label:'sus4' },
+  { id:'add9',   label:'add9' },
+  { id:'add11',  label:'add11' },
+  { id:'5',      label:'5(pow)' },
+];
+
+const STROKES = [
+  { id:'strong',   label:'Strong ↓↑',  sym:'↓↑' },
+  { id:'weak',     label:'Weak ↓',     sym:'↓' },
+  { id:'arpeggio', label:'Arpeggio ∿', sym:'∿' },
+];
+
+// Chord -> fret voicings (6 strings: E A D G B e, -1=muted)
+const VOICINGS = {
+  'C':     [[-1,3,2,0,1,0]],
+  'C#':    [[-1,4,3,1,2,1]],
+  'D':     [[-1,-1,0,2,3,2]],
+  'D#':    [[-1,-1,1,3,4,3]],
+  'E':     [[0,2,2,1,0,0]],
+  'F':     [[1,3,3,2,1,1]],
+  'F#':    [[2,4,4,3,2,2]],
+  'G':     [[3,2,0,0,0,3]],
+  'G#':    [[4,6,6,5,4,4]],
+  'A':     [[-1,0,2,2,2,0]],
+  'A#':    [[-1,1,3,3,3,1]],
+  'B':     [[-1,2,4,4,4,2]],
+  'Cm':    [[-1,3,5,5,4,3]],
+  'C#m':   [[-1,4,6,6,5,4]],
+  'Dm':    [[-1,-1,0,2,3,1]],
+  'D#m':   [[-1,-1,1,3,4,2]],
+  'Em':    [[0,2,2,0,0,0]],
+  'Fm':    [[1,3,3,1,1,1]],
+  'F#m':   [[2,4,4,2,2,2]],
+  'Gm':    [[3,5,5,3,3,3]],
+  'G#m':   [[4,6,6,4,4,4]],
+  'Am':    [[-1,0,2,2,1,0]],
+  'A#m':   [[-1,1,3,3,2,1]],
+  'Bm':    [[-1,2,4,4,3,2]],
+};
+
+function getVoicing(root, quality) {
+  const key = root + (quality==='min'?'m':'');
+  return VOICINGS[key] || null;
+}
+
+// ──────────────────────────────────────────────
+//  CHORD NAME BUILDER
+// ──────────────────────────────────────────────
+function buildChordName(chord) {
+  if (!chord || !chord.root) return null;
+  const r = ROOT_DISPLAY[chord.root];
+  const q = chord.quality==='min' ? 'm'
+           : chord.quality==='dim' ? 'dim'
+           : chord.quality==='aug' ? 'aug' : '';
+  let t = '';
+  if (chord.tension === 'maj7') t = 'M7';
+  else if (chord.tension === 'maj9') t = 'M9';
+  else if (chord.tension) t = chord.tension;
+  const ext = chord.ext || '';
+  // don't double-up sus
+  const extStr = (ext && !t.includes('sus')) ? ext : (ext ? ext : '');
+  const bass = chord.bass ? '/' + ROOT_DISPLAY[chord.bass] : '';
+  return r + q + t + extStr + bass;
+}
+
+function buildChordSub(chord) {
+  if (!chord || !chord.root) return '';
+  const q = chord.quality==='maj' ? 'Major'
+           : chord.quality==='min' ? 'Minor'
+           : chord.quality==='dim' ? 'Diminished'
+           : chord.quality==='aug' ? 'Augmented' : '';
+  const stroke = STROKES.find(s=>s.id===chord.stroke);
+  return q + (stroke ? ' · ' + stroke.label : '');
+}
+
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+// sections: array of sections
+// section: { measures: [measure, measure, measure, measure] }
+// measure: { slots: [chord|null, chord|null] }
+// chord: { root, quality, tension, ext, bass, stroke }
+// playback: { state: 'stopped'|'playing'|'paused', sectionIdx, measureIdx, slotIdx, beatInSlot, scheduledTime }
+
+let sections = [
+  makeSectionData(),
+  makeSectionData(),
+];
+
+function makeSectionData() {
+  return { measures: [makeMeasure(),makeMeasure(),makeMeasure(),makeMeasure()] };
+}
+function makeMeasure() {
+  return { slots: [null, null] }; // null=rest, {hold:true}=sustain
+}
+
+// builder state
+let builder = {
+  root: 'C',
+  quality: 'maj',
+  tension: '',
+  ext: '',
+  bass: '',
+  stroke: 'strong',
+};
+
+// selected slot
+let selectedSlot = null; // { sectionIdx, measureIdx, slotIdx }
+
+// playback
+const pb = {
+  state: 'stopped',
+  sectionIdx: 0,
+  measureIdx: 0,
+  beatIdx: 0,      // 0..3 per measure
+  loop: false,
+  audioCtx: null,
+  nextBeatTime: 0,
+  scheduleAhead: 0.1,
+  lookaheadMs: 25,
+  timerId: null,
+  bpm: 80,
+};
+
+// ──────────────────────────────────────────────
+//  AUDIO ENGINE
+// ──────────────────────────────────────────────
+function initAudio() {
+  if (!pb.audioCtx) {
+    pb.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+// Guitar string frequencies (standard tuning, open)
+const OPEN_FREQ = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63]; // E2 A2 D3 G3 B3 E4
+
+function semitoneFreq(base, semi) { return base * Math.pow(2, semi/12); }
+
+function pluckString(freq, time, gain, ctx, duration=1.6) {
+  const fundamental = ctx.createOscillator();
+  const octave = ctx.createOscillator();
+  const pickNoise = ctx.createBufferSource();
+
+  const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+  }
+  pickNoise.buffer = noiseBuffer;
+
+  const noiseFilter = ctx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.value = 2500;
+  noiseFilter.Q.value = 0.8;
+
+  const toneFilter = ctx.createBiquadFilter();
+  toneFilter.type = 'lowpass';
+  toneFilter.frequency.setValueAtTime(4200, time);
+  toneFilter.frequency.exponentialRampToValueAtTime(1800, time + duration);
+
+  const env = ctx.createGain();
+
+  fundamental.type = 'triangle';
+  octave.type = 'sine';
+
+  fundamental.frequency.setValueAtTime(freq, time);
+  octave.frequency.setValueAtTime(freq * 2, time);
+
+  env.gain.setValueAtTime(0.0001, time);
+  env.gain.linearRampToValueAtTime(gain, time + 0.008);
+  env.gain.exponentialRampToValueAtTime(gain * 0.5, time + 0.12);
+  env.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+  fundamental.connect(toneFilter);
+  octave.connect(toneFilter);
+
+  pickNoise.connect(noiseFilter);
+  noiseFilter.connect(env);
+
+  toneFilter.connect(env);
+  env.connect(ctx.destination);
+
+  fundamental.start(time);
+  octave.start(time);
+  pickNoise.start(time);
+
+  pickNoise.stop(time + 0.08);
+  fundamental.stop(time + duration);
+  octave.stop(time + duration);
+}
+
+function strumChord(chord, time, stroke) {
+  const ctx = pb.audioCtx;
+  if (!ctx) return;
+
+  const voicing = getVoicing(chord.root, chord.quality) || null;
+  const frets = voicing ? voicing[0] : buildGenericFrets(chord);
+
+  const beatSec = 60 / pb.bpm;
+
+  if (stroke === 'arpeggio') {
+    frets.forEach((f, si) => {
+      if (f < 0) return;
+      const freq = semitoneFreq(OPEN_FREQ[si], f);
+      const t = time + si * beatSec * 0.12;
+      pluckString(freq, t, 0.18, ctx, 2.0);
+    });
+  } else {
+    const isStrong = stroke === 'strong';
+    const g = isStrong ? 0.22 : 0.12;
+    // Down strum (low to high strings)
+    frets.forEach((f, si) => {
+      if (f < 0) return;
+      const freq = semitoneFreq(OPEN_FREQ[si], f);
+      const t = time + si * 0.015;
+      pluckString(freq, t, g, ctx, 1.4);
+    });
+    if (isStrong) {
+      // Up strum
+      [...frets].reverse().forEach((f, si) => {
+        const origSi = 5 - si;
+        if (f < 0) return;
+        const freq = semitoneFreq(OPEN_FREQ[origSi], f);
+        const t = time + beatSec*0.5 + si * 0.012;
+        pluckString(freq, t, g*0.6, ctx, 1.0);
+      });
+    }
+  }
+}
+
+function buildGenericFrets(chord) {
+  // Fallback: build frets from root + quality intervals
+  const rootIdx = ROOTS.indexOf(chord.root);
+  const intervals = chord.quality==='min' ? [0,3,7]
+                  : chord.quality==='dim' ? [0,3,6]
+                  : chord.quality==='aug' ? [0,4,8]
+                  : [0,4,7];
+  if (chord.tension==='7') intervals.push(10);
+  else if (chord.tension==='maj7') intervals.push(11);
+  else if (chord.tension==='9') { intervals.push(10); intervals.push(14); }
+
+  // Map to 6 strings roughly
+  const frets = [];
+  for (let si=0; si<6; si++) {
+    const openSemi = Math.round(Math.log2(OPEN_FREQ[si]/OPEN_FREQ[0])*12);
+    const int = intervals[si % intervals.length];
+    let f = (rootIdx + int - openSemi) % 12;
+    if (f < 0) f += 12;
+    frets.push(f);
+  }
+  return frets;
+}
+
+// ──────────────────────────────────────────────
+//  SCHEDULER
+// ──────────────────────────────────────────────
+function totalMeasures() {
+  return sections.reduce((a,s)=>a+s.measures.length,0);
+}
+
+function globalMeasureIndex() {
+  let idx = 0;
+  for (let si=0; si<pb.sectionIdx; si++) idx += sections[si].measures.length;
+  idx += pb.measureIdx;
+  return idx;
+}
+
+function setGlobalMeasure(gm) {
+  let remaining = gm;
+  for (let si=0; si<sections.length; si++) {
+    if (remaining < sections[si].measures.length) {
+      pb.sectionIdx = si; pb.measureIdx = remaining; pb.beatIdx = 0;
+      return;
+    }
+    remaining -= sections[si].measures.length;
+  }
+  pb.sectionIdx = sections.length-1;
+  pb.measureIdx = sections[pb.sectionIdx].measures.length-1;
+  pb.beatIdx = 0;
+}
+
+function scheduler() {
+  const ctx = pb.audioCtx;
+  while (pb.nextBeatTime < ctx.currentTime + pb.scheduleAhead) {
+    scheduleBeat(pb.nextBeatTime);
+    advanceBeat();
+  }
+  pb.timerId = setTimeout(scheduler, pb.lookaheadMs);
+}
+
+function scheduleBeat(time) {
+  const sec = sections[pb.sectionIdx];
+  if (!sec) return;
+  const measure = sec.measures[pb.measureIdx];
+  if (!measure) return;
+
+  // slot 0: beats 0,1  slot 1: beats 2,3
+  const slotIdx = pb.beatIdx < 2 ? 0 : 1;
+  const isSlotStart = pb.beatIdx === 0 || pb.beatIdx === 2;
+
+  const chord = measure.slots[slotIdx];
+  if (isSlotStart) {
+    if (chord?.hold) {
+      // sustain previous resonance
+    } else if (chord) {
+      strumChord(chord, time, chord.stroke || 'strong');
+    } else {
+      // explicit rest
+    }
+  }
+
+  // schedule UI update
+  const delay = (time - pb.audioCtx.currentTime) * 1000;
+  setTimeout(() => {
+    updatePlayheadUI();
+  }, Math.max(0, delay));
+}
+
+function advanceBeat() {
+  const beatSec = 60 / pb.bpm;
+  pb.nextBeatTime += beatSec;
+  pb.beatIdx++;
+  if (pb.beatIdx >= 4) {
+    pb.beatIdx = 0;
+    pb.measureIdx++;
+    if (pb.measureIdx >= sections[pb.sectionIdx].measures.length) {
+      pb.measureIdx = 0;
+      pb.sectionIdx++;
+      if (pb.sectionIdx >= sections.length) {
+        if (pb.loop) {
+          pb.sectionIdx = 0;
+        } else {
+          stopPlayback();
+          return;
+        }
+      }
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+//  PLAYBACK CONTROLS
+// ──────────────────────────────────────────────
+function startPlayback() {
+  initAudio();
+  if (pb.audioCtx.state === 'suspended') pb.audioCtx.resume();
+  clearTimeout(pb.timerId);
+  pb.state = 'playing';
+  pb.nextBeatTime = pb.audioCtx.currentTime + 0.05;
+  scheduler();
+  updateTransportUI();
+}
+
+function pausePlayback() {
+  if (pb.state !== 'playing') return;
+  clearTimeout(pb.timerId);
+  pb.state = 'paused';
+  updateTransportUI();
+}
+
+function stopPlayback() {
+  clearTimeout(pb.timerId);
+  pb.state = 'stopped';
+  pb.sectionIdx = 0; pb.measureIdx = 0; pb.beatIdx = 0;
+  updateTransportUI();
+  updatePlayheadUI();
+}
+
+function togglePlay() {
+  if (pb.state === 'playing') pausePlayback();
+  else startPlayback();
+}
+
+function seekPrev() {
+  const gm = globalMeasureIndex();
+  setGlobalMeasure(Math.max(0, gm-1));
+  if (pb.state === 'playing') {
+    clearTimeout(pb.timerId);
+    pb.nextBeatTime = pb.audioCtx.currentTime + 0.05;
+    scheduler();
+  }
+  updatePlayheadUI();
+}
+
+function seekNext() {
+  const gm = globalMeasureIndex();
+  setGlobalMeasure(Math.min(totalMeasures()-1, gm+1));
+  if (pb.state === 'playing') {
+    clearTimeout(pb.timerId);
+    pb.nextBeatTime = pb.audioCtx.currentTime + 0.05;
+    scheduler();
+  }
+  updatePlayheadUI();
+}
+
+// ──────────────────────────────────────────────
+//  UI RENDERING
+// ──────────────────────────────────────────────
+function renderScore() {
+  const wrap = document.getElementById('scoreWrap');
+  wrap.innerHTML = '';
+
+  sections.forEach((sec, si) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+    div.innerHTML = `<div class="section-label">Section ${si+1}</div>`;
+
+    const row = document.createElement('div');
+    row.className = 'measures-row';
+
+    sec.measures.forEach((measure, mi) => {
+      const mDiv = document.createElement('div');
+      mDiv.className = 'measure';
+      mDiv.id = `m-${si}-${mi}`;
+
+      const isPlaying = pb.sectionIdx===si && pb.measureIdx===mi && pb.state==='playing';
+      if (isPlaying) mDiv.classList.add('playing');
+
+      const globalMi = (() => {
+        let g=0; for(let x=0;x<si;x++) g+=sections[x].measures.length; return g+mi;
+      })();
+
+      mDiv.innerHTML = `<div class="measure-num">BAR ${globalMi+1}</div>`;
+
+      // Beats row
+      const beats = document.createElement('div');
+      beats.className = 'beats-row';
+      for (let b=0;b<4;b++) {
+        const dot = document.createElement('div');
+        dot.className = 'beat-dot';
+        dot.id = `beat-${si}-${mi}-${b}`;
+        const isActiveBeat = isPlaying && pb.beatIdx===b;
+        if (isActiveBeat) dot.classList.add('active');
+        beats.appendChild(dot);
+      }
+      mDiv.appendChild(beats);
+
+      // Slots
+      const slots = document.createElement('div');
+      slots.className = 'slots-row';
+      measure.slots.forEach((chord, sli) => {
+        const slot = document.createElement('div');
+        slot.className = 'chord-slot' + (chord ? ' filled' : '');
+        slot.id = `slot-${si}-${mi}-${sli}`;
+
+        const isSelected = selectedSlot && selectedSlot.sectionIdx===si && selectedSlot.measureIdx===mi && selectedSlot.slotIdx===sli;
+        const isActiveBeat = isPlaying && ((sli===0 && pb.beatIdx<2)||(sli===1 && pb.beatIdx>=2));
+
+        if (isSelected) slot.style.borderColor = 'var(--accent)';
+        if (isActiveBeat) slot.classList.add('active-beat');
+
+        if (chord && !chord.hold) {
+          const name = buildChordName(chord);
+          const stroke = STROKES.find(s=>s.id===chord.stroke);
+          slot.innerHTML = `
+            <div class="chord-name">${name}</div>
+            <div class="chord-quality">${chord.quality==='maj'?'Major':chord.quality==='min'?'Minor':chord.quality==='dim'?'Dim':'Aug'}</div>
+            <div class="chord-stroke">${stroke?stroke.sym:''}</div>
+            <span class="slot-clear" onclick="clearSlot(event,${si},${mi},${sli})">✕</span>
+          `;
+        } else if (chord?.hold) {
+          slot.innerHTML = `<span class="hold-hint">→</span>`;
+        } else {
+          slot.innerHTML = `<span class="slot-empty-hint">+</span>`;
+        }
+        slot.addEventListener('click', (e) => {
+          if (e.altKey || e.metaKey) {
+            const current = sections[si].measures[mi].slots[sli];
+            sections[si].measures[mi].slots[sli] = current?.hold ? null : { hold:true };
+            renderScore();
+            return;
+          }
+          selectSlot(si, mi, sli);
+        });
+        slots.appendChild(slot);
+      });
+      mDiv.appendChild(slots);
+
+      row.appendChild(mDiv);
+    });
+
+    div.appendChild(row);
+    wrap.appendChild(div);
+  });
+
+  // Add section button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-section-btn';
+  addBtn.innerHTML = '+ 소절 추가';
+  addBtn.onclick = addSection;
+  wrap.appendChild(addBtn);
+}
+
+function updatePlayheadUI() {
+  // Update beat dots
+  document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.measure').forEach(m => m.classList.remove('playing'));
+  document.querySelectorAll('.chord-slot').forEach(s => s.classList.remove('active-beat'));
+
+  if (pb.state === 'playing' || pb.state === 'paused') {
+    const beatId = `beat-${pb.sectionIdx}-${pb.measureIdx}-${pb.beatIdx}`;
+    const bd = document.getElementById(beatId);
+    if (bd) bd.classList.add('active');
+
+    const mEl = document.getElementById(`m-${pb.sectionIdx}-${pb.measureIdx}`);
+    if (mEl && pb.state==='playing') mEl.classList.add('playing');
+
+    const sli = pb.beatIdx < 2 ? 0 : 1;
+    const slotEl = document.getElementById(`slot-${pb.sectionIdx}-${pb.measureIdx}-${sli}`);
+    if (slotEl && pb.state==='playing') slotEl.classList.add('active-beat');
+  }
+
+  // Position display
+  const gm = globalMeasureIndex() + 1;
+  const total = totalMeasures();
+  document.getElementById('posSection').textContent = pb.sectionIdx+1;
+  document.getElementById('posBar').textContent = pb.measureIdx+1;
+  document.getElementById('posBeat').textContent = pb.beatIdx+1;
+
+  const pct = total > 0 ? ((globalMeasureIndex()) / total * 100) : 0;
+  document.getElementById('seekProgress').style.width = pct + '%';
+}
+
+function updateTransportUI() {
+  const btn = document.getElementById('playPauseBtn');
+  btn.textContent = pb.state==='playing' ? '⏸' : '▶';
+  updatePlayheadUI();
+}
+
+// ──────────────────────────────────────────────
+//  CHORD BUILDER UI
+// ──────────────────────────────────────────────
+function renderBuilder() {
+  renderBtnGroup('rootBtns', ROOTS, r => ({id:r, label:ROOT_DISPLAY[r]}), 'root');
+  renderBtnGroup('qualityBtns', QUALITIES, q=>q, 'quality');
+  renderBtnGroup('tensionBtns', TENSIONS, t=>t, 'tension');
+  renderBtnGroup('extBtns', EXTENSIONS, e=>e, 'ext');
+  renderBtnGroup('strokeBtns', STROKES, s=>s, 'stroke');
+
+  // Bass: none + all roots
+  const bassOpts = [{id:'', label:'—'}, ...ROOTS.map(r=>({id:r, label:ROOT_DISPLAY[r]}))];
+  renderBtnGroup('bassBtns', bassOpts, x=>x, 'bass');
+}
+
+function renderBtnGroup(containerId, items, mapper, field) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  items.forEach(item => {
+    const mapped = mapper(item);
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn' + (builder[field]===mapped.id ? ' selected' : '');
+    btn.textContent = mapped.label;
+    btn.onclick = () => { builder[field] = mapped.id; updateBuilderUI(); };
+    container.appendChild(btn);
+  });
+}
+
+function updateBuilderUI() {
+  // Re-render buttons (selected state)
+  renderBuilder();
+  // Preview
+  const name = buildChordName({ root: builder.root, quality: builder.quality,
+    tension: builder.tension, ext: builder.ext, bass: builder.bass });
+  document.getElementById('previewName').textContent = name || '—';
+  const q = builder.quality==='maj'?'Major':builder.quality==='min'?'Minor':builder.quality==='dim'?'Dim':'Aug';
+  const stroke = STROKES.find(s=>s.id===builder.stroke);
+  document.getElementById('previewSub').textContent = q + (stroke?' · '+stroke.label:'');
+
+  // Fretboard
+  drawFretboard();
+
+  // Apply button
+  const applyBtn = document.getElementById('applyBtn');
+  applyBtn.disabled = !selectedSlot;
+  applyBtn.textContent = selectedSlot ? '✓ 코드 적용' : '슬롯 선택 후 적용';
+}
+
+function selectSlot(si, mi, sli) {
+  selectedSlot = { sectionIdx:si, measureIdx:mi, slotIdx:sli };
+  // If slot has chord, load it into builder
+  const chord = sections[si].measures[mi].slots[sli];
+  if (chord) {
+    builder.root = chord.root || 'C';
+    builder.quality = chord.quality || 'maj';
+    builder.tension = chord.tension || '';
+    builder.ext = chord.ext || '';
+    builder.bass = chord.bass || '';
+    builder.stroke = chord.stroke || 'strong';
+  }
+  updateBuilderUI();
+  renderScore();
+  openSidebar();
+  // Highlight
+  const slotEl = document.getElementById(`slot-${si}-${mi}-${sli}`);
+  if (slotEl) slotEl.style.borderColor = 'var(--accent)';
+}
+
+function applyChord() {
+  if (!selectedSlot) return;
+  const { sectionIdx, measureIdx, slotIdx } = selectedSlot;
+  sections[sectionIdx].measures[measureIdx].slots[slotIdx] = { ...builder };
+  renderScore();
+  drawFretboard();
+}
+
+function clearSlot(e, si, mi, sli) {
+  e.stopPropagation();
+  sections[si].measures[mi].slots[sli] = null;
+  if (selectedSlot && selectedSlot.sectionIdx===si && selectedSlot.measureIdx===mi && selectedSlot.slotIdx===sli) {
+    selectedSlot = null;
+  }
+  renderScore();
+  updateBuilderUI();
+}
+
+function addSection() {
+  sections.push(makeSectionData());
+  renderScore();
+}
+
+// ──────────────────────────────────────────────
+//  FRETBOARD CANVAS
+// ──────────────────────────────────────────────
+function drawFretboard() {
+  const canvas = document.getElementById('fretCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const frets = getVoicing(builder.root, builder.quality);
+  if (!frets) {
+    ctx.fillStyle = '#606070';
+    ctx.font = '11px Space Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('voicing data 없음', W/2, H/2);
+    return;
+  }
+  const f = frets[0];
+
+  const padL=28, padR=10, padT=16, padB=10;
+  const nFrets=5, nStrings=6;
+  const fw = (W-padL-padR)/nFrets;
+  const sh = (H-padT-padB)/(nStrings-1);
+
+  // Nut / fret lines
+  ctx.strokeStyle='#2e2e38';
+  ctx.lineWidth=1;
+  for (let fr=0; fr<=nFrets; fr++) {
+    const x=padL+fr*fw;
+    ctx.beginPath(); ctx.moveTo(x,padT); ctx.lineTo(x,H-padB); ctx.stroke();
+  }
+  // String lines
+  for (let s=0; s<nStrings; s++) {
+    const y=padT+s*sh;
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+  }
+
+  // Min fret for position
+  const validFrets = f.filter(x=>x>0);
+  const minFret = validFrets.length>0 ? Math.min(...validFrets) : 1;
+  const offset = Math.max(0, minFret-1);
+
+  // Fret numbers
+  ctx.fillStyle='#606070'; ctx.font='8px Space Mono'; ctx.textAlign='center';
+  for (let fr=1; fr<=nFrets; fr++) {
+    ctx.fillText(offset+fr, padL+(fr-0.5)*fw, padT-4);
+  }
+
+  // Dots
+  f.forEach((fr, si) => {
+    const y = padT + si*sh;
+    if (fr < 0) {
+      // muted
+      ctx.strokeStyle='#e85447'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(padL-10,y-4); ctx.lineTo(padL-6,y+4);
+      ctx.moveTo(padL-10,y+4); ctx.lineTo(padL-6,y-4);
+      ctx.stroke();
+    } else if (fr === 0) {
+      // open
+      ctx.strokeStyle='#47c47a'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.arc(padL-8, y, 3, 0, Math.PI*2);
+      ctx.stroke();
+    } else {
+      const relFr = fr - offset;
+      if (relFr >= 1 && relFr <= nFrets) {
+        const x = padL + (relFr-0.5)*fw;
+        ctx.fillStyle='#e8c547';
+        ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI*2); ctx.fill();
+      }
+    }
+  });
+}
+
+// ──────────────────────────────────────────────
+//  EVENT WIRING
+// ──────────────────────────────────────────────
+document.getElementById('playPauseBtn').onclick = togglePlay;
+document.getElementById('stopBtn').onclick = stopPlayback;
+document.getElementById('seekPrev').onclick = seekPrev;
+document.getElementById('seekNext').onclick = seekNext;
+
+document.getElementById('applyBtn').onclick = applyChord;
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').style.display='none';
+}
+function openSidebar(){
+  if(window.innerWidth <= 900){
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebarBackdrop').style.display='block';
+  }
+}
+document.getElementById('sidebarClose').onclick = closeSidebar;
+document.getElementById('sidebarBackdrop').onclick = closeSidebar;
+
+
+const bpmInput = document.getElementById('bpmInput');
+const bpmSlider = document.getElementById('bpmSlider');
+bpmInput.oninput = () => { pb.bpm = parseInt(bpmInput.value)||80; bpmSlider.value = pb.bpm; };
+bpmSlider.oninput = () => { pb.bpm = parseInt(bpmSlider.value)||80; bpmInput.value = pb.bpm; };
+
+document.getElementById('loopToggle').onclick = function() {
+  pb.loop = !pb.loop;
+  this.textContent = pb.loop ? 'LOOP ON' : 'LOOP OFF';
+  this.classList.toggle('on', pb.loop);
+};
+
+// Seek bar click
+document.getElementById('seekBarWrap').onclick = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  const total = totalMeasures();
+  const target = Math.floor(ratio * total);
+  setGlobalMeasure(Math.max(0, Math.min(total-1, target)));
+  if (pb.state === 'playing') {
+    clearTimeout(pb.timerId);
+    pb.nextBeatTime = pb.audioCtx.currentTime + 0.05;
+    scheduler();
+  }
+  updatePlayheadUI();
+};
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'Escape') { stopPlayback(); }
+  if (e.code === 'ArrowLeft') seekPrev();
+  if (e.code === 'ArrowRight') seekNext();
+  if (e.code === 'Enter' && selectedSlot) applyChord();
+});
+
+// ──────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────
+renderBuilder();
+renderScore();
+updateBuilderUI();
+updateTransportUI();
+
+// Pre-fill example chords
+sections[0].measures[0].slots[0] = { root:'G', quality:'maj', tension:'', ext:'', bass:'', stroke:'strong' };
+sections[0].measures[0].slots[1] = { root:'E', quality:'min', tension:'', ext:'', bass:'', stroke:'weak' };
+sections[0].measures[1].slots[0] = { root:'C', quality:'maj', tension:'', ext:'', bass:'', stroke:'strong' };
+sections[0].measures[1].slots[1] = { root:'D', quality:'maj', tension:'', ext:'', bass:'', stroke:'arpeggio' };
+sections[0].measures[2].slots[0] = { root:'G', quality:'maj', tension:'7', ext:'', bass:'', stroke:'strong' };
+sections[0].measures[2].slots[1] = { root:'E', quality:'min', tension:'', ext:'', bass:'', stroke:'weak' };
+sections[0].measures[3].slots[0] = { root:'C', quality:'maj', tension:'maj7', ext:'', bass:'', stroke:'arpeggio' };
+sections[0].measures[3].slots[1] = { root:'D', quality:'maj', tension:'', ext:'sus4', bass:'', stroke:'strong' };
+renderScore();
+</script>
+</body>
+</html>
