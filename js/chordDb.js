@@ -102,21 +102,21 @@ export function resolveChordShape(chord) {
   return chordDb[key] ?? null;
 }
 
-// Map chord shape to absolute MIDI notes
+// Map chord shape to absolute MIDI notes (returns 6 elements, -1 for muted strings)
 export function mapShapeToNotes(shape) {
   const baseFret = shape.baseFret ?? 1;
   return shape.frets.map((fret, stringIdx) => {
     if (fret < 0) return -1;
     const absFret = fret === 0 ? 0 : fret + (baseFret - 1);
     return jy[stringIdx] + absFret;
-  }).filter(note => note >= 0);
+  });
 }
 
-// Generate fallback voicing dynamically when shape is not in database
+// Generate fallback voicing dynamically when shape is not in database (returns 6 elements)
 export function generateFallbackVoicing(chord) {
   const rootOffset = ob[chord.root ?? "C"] ?? 0;
   const intervals = rb[chord.quality] ?? [0, 4, 7];
-  const notes = [];
+  const notes = [-1, -1, -1, -1, -1, -1];
   
   for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
     const openNote = jy[stringIdx];
@@ -126,19 +126,19 @@ export function generateFallbackVoicing(chord) {
       const targetPitchClass = (rootOffset + interval) % 12;
       const fret = (targetPitchClass - openPitchClass + 12) % 12;
       if (fret <= 5) {
-        notes.push(openNote + fret);
+        notes[stringIdx] = openNote + fret;
         break;
       }
     }
   }
   
-  if (notes.length === 0) {
-    notes.push(60 + rootOffset); // Default fallback note (Middle C region + offset)
+  if (notes.every(n => n === -1)) {
+    notes[0] = 60 + rootOffset; // Default fallback note
   }
   return notes;
 }
 
-// Resolve all active MIDI notes for a chord slot
+// Resolve all active MIDI notes for a chord slot (returns 6 elements, -1 for muted strings)
 export function resolveChordNotes(chord) {
   if (!chord || !chord.root) return [];
   const shape = resolveChordShape(chord);

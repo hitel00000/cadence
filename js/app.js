@@ -677,7 +677,7 @@ function updateEditingSlot(updatedFields) {
   // Trigger sound preview if root note was changed
   if (updatedFields.root || updatedFields.quality || updatedFields.tension || updatedFields.extension || updatedFields.bassNote) {
     if (slot.root && !slot.isContinue) {
-      previewChord(slot, state.song.stroke);
+      previewChord(slot, state.song.stroke, state.song.bpm);
     }
   }
   
@@ -701,7 +701,7 @@ function toggleContinueSlot() {
 function previewEditingChord() {
   const slot = getEditingSlot();
   if (slot && slot.root && !slot.isContinue) {
-    previewChord(slot, state.song.stroke);
+    previewChord(slot, state.song.stroke, state.song.bpm);
   }
 }
 
