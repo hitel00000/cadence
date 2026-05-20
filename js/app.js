@@ -958,10 +958,11 @@ function bindEvents() {
     renderPicker();
   });
   
-  // Keyboard Shortcuts (Spacebar = Play/Pause, Esc = Stop)
+  // Keyboard Shortcuts (Spacebar = Play/Pause, Esc = Stop, Arrows = Seek, Enter = Apply/Done)
   window.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
-      return; // Skip shortcuts when typing/focussed
+    // Avoid triggering shortcuts when editing input values
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) {
+      return;
     }
     
     if (e.code === "Space") {
@@ -974,6 +975,17 @@ function bindEvents() {
       } else {
         stopPlayback();
       }
+    } else if (e.code === "Enter") {
+      if (dom.modalOverlay.classList.contains("open")) {
+        e.preventDefault();
+        closePicker();
+      }
+    } else if (e.code === "ArrowLeft") {
+      e.preventDefault();
+      seekPrev();
+    } else if (e.code === "ArrowRight") {
+      e.preventDefault();
+      seekNext();
     }
   });
 }

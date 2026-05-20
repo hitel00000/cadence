@@ -87,7 +87,7 @@
   <div class="modal-overlay" id="modal-overlay"></div>
 
   <!-- Sliding Chord Picker Modal Sheet -->
-  <div class="modal-sheet" id="modal-sheet">
+  <div class="modal-sheet" id="modal-sheet" data-testid="chord-picker">
     
     <!-- Modal Header -->
     <div class="modal-header">
@@ -95,15 +95,15 @@
         <span class="modal-chord-preview-name" id="modal-chord-name">—</span>
         <span class="modal-chord-sub" id="modal-chord-sub">지판을 선택하여 화음을 구성해 보세요.</span>
       </div>
-      <button class="preview-sound-btn" id="preview-sound-btn" title="Preview Chord"></button>
-      <button class="close-modal-btn" id="close-modal-btn" title="Close Modal"></button>
+      <button class="preview-sound-btn" id="preview-sound-btn" data-testid="preview-chord" title="Preview Chord"></button>
+      <button class="close-modal-btn" id="close-modal-btn" data-testid="close-picker" title="Close Modal"></button>
     </div>
     
     <!-- Modal Scrollable Content -->
     <div class="modal-body">
       
       <!-- Sustain Toggle Button -->
-      <button class="continue-toggle-btn" id="continue-toggle-btn">
+      <button class="continue-toggle-btn" id="continue-toggle-btn" data-testid="toggle-continue">
         <div class="text-left">
           <div class="title">이전 슬롯 이어서 연주 (Sustain)</div>
           <div class="subtitle">이전 코드 음을 끊지 않고 다음 슬롯까지 연주를 지속합니다.</div>
