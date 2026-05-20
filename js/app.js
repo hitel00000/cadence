@@ -196,15 +196,50 @@ function loadSong() {
     const saved = localStorage.getItem("cadence_song");
     if (saved) {
       state.song = JSON.parse(saved);
+      
       // Validate structure roughly
       if (!state.song.sections || state.song.sections.length === 0) {
         state.song = createDefaultSong();
+        return;
       }
+      
+      // Migrate legacy database schemas (e.g. measures -> bars, null/hold slots -> slot objects)
+      state.song.sections.forEach(section => {
+        if (section.measures && !section.bars) {
+          section.bars = section.measures;
+          delete section.measures;
+        }
+        
+        if (section.bars) {
+          section.bars.forEach(bar => {
+            if (bar.slots) {
+              bar.slots = bar.slots.map(slot => {
+                if (slot === null) {
+                  return createEmptySlot();
+                }
+                if (slot.hold) {
+                  return createContinueSlot();
+                }
+                return {
+                  root: slot.root ?? null,
+                  quality: slot.quality ?? "major",
+                  tension: slot.tension ?? "",
+                  extension: slot.extension ?? "",
+                  bassNote: slot.bassNote ?? null,
+                  isContinue: !!slot.isContinue
+                };
+              });
+            } else {
+              bar.slots = [createEmptySlot(), createEmptySlot()];
+            }
+          });
+        }
+      });
     } else {
       state.song = createDefaultSong();
     }
   } catch (e) {
-    console.error("Failed to load song from localStorage:", e);
+    console.error("Failed to load and migrate song from localStorage:", e);
     state.song = createDefaultSong();
   }
 }
