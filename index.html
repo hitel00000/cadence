@@ -1,25 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Cadence</title>
-    <meta name="description" content="Cadence — built on Replit. Update this description to reflect the app." />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Cadence" />
-    <meta property="og:description" content="Cadence — built on Replit. Update this description to reflect the app." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Cadence" />
-    <meta name="twitter:description" content="Cadence — built on Replit. Update this description to reflect the app." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-pGaiG8xE.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DFzXkCe5.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Cadence</title>
+  
+  <meta name="description" content="Cadence - A premium lightweight guitar chord player and sequencer." />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="Cadence" />
+  <meta property="og:description" content="A premium lightweight guitar chord player and sequencer." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cadence" />
+  
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/style.css">
+  
+  <!-- Modern Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Load modular Vanilla JS app -->
+  <script type="module" src="/js/app.js"></script>
+</head>
+<body>
+  
+  <!-- Header Bar -->
+  <header>
+    <div class="logo-container">
+      <h1>Cadence</h1>
+      <span class="badge">4/4</span>
+    </div>
+    <div class="status-container">
+      <span data-testid="section-count">1 section</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-primary/60 flex items-center gap-1.5">
+        <span class="pulse-dot"></span>
+        <span>Auto-saved</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Transport Control Bar (Playback Toolbar) -->
+  <div class="transport-bar" data-testid="transport-bar">
+    <div class="transport-container">
+      
+      <!-- BPM Input -->
+      <div class="bpm-controls">
+        <button class="bpm-btn" data-testid="bpm-down">&ndash;</button>
+        <input type="number" min="40" max="240" value="120" class="bpm-input" data-testid="bpm-input">
+        <button class="bpm-btn" data-testid="bpm-up">+</button>
+      </div>
+      <span class="bpm-label">BPM</span>
+      
+      <!-- Stroke Selector -->
+      <button class="stroke-selector" data-testid="stroke-selector" title="Stroke: Arpeggio">
+        <span class="stroke-symbol">~</span>
+        <span class="stroke-text">Arpeggio</span>
+      </button>
+      
+      <!-- Loop Toggle -->
+      <button class="loop-toggle active" data-testid="loop-toggle" title="Loop"></button>
+      
+      <!-- Playback Actions -->
+      <div class="play-controls">
+        <button class="play-btn" data-testid="seek-first" title="Seek First"></button>
+        <button class="play-btn" data-testid="seek-prev" title="Seek Previous"></button>
+        <button class="play-btn main-btn paused" data-testid="play-pause" title="Play/Pause"></button>
+        <button class="play-btn" data-testid="stop" title="Stop"></button>
+        <button class="play-btn" data-testid="seek-next" title="Seek Next"></button>
+        <button class="play-btn" data-testid="seek-last" title="Seek Last"></button>
+      </div>
+      
+      <!-- Playback Position Display -->
+      <span class="position-display" data-testid="position-display">1/4</span>
+      
+    </div>
+  </div>
+
+  <!-- Scrollable Chord Progression Editor -->
+  <main class="progression-editor" data-testid="progression-editor">
+    <!-- Rendered dynamically by JS -->
+  </main>
+
+  <!-- Modal Overlay Backdrop -->
+  <div class="modal-overlay" id="modal-overlay"></div>
+
+  <!-- Sliding Chord Picker Modal Sheet -->
+  <div class="modal-sheet" id="modal-sheet">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-chord-preview-name" id="modal-chord-name">—</span>
+        <span class="modal-chord-sub" id="modal-chord-sub">지판을 선택하여 화음을 구성해 보세요.</span>
+      </div>
+      <button class="preview-sound-btn" id="preview-sound-btn" title="Preview Chord"></button>
+      <button class="close-modal-btn" id="close-modal-btn" title="Close Modal"></button>
+    </div>
+    
+    <!-- Modal Scrollable Content -->
+    <div class="modal-body">
+      
+      <!-- Sustain Toggle Button -->
+      <button class="continue-toggle-btn" id="continue-toggle-btn">
+        <div class="text-left">
+          <div class="title">이전 슬롯 이어서 연주 (Sustain)</div>
+          <div class="subtitle">이전 코드 음을 끊지 않고 다음 슬롯까지 연주를 지속합니다.</div>
+        </div>
+      </button>
+      
+      <!-- Root Note Grid Selection -->
+      <div class="picker-section">
+        <p class="picker-label">Root</p>
+        <div class="grid-6" id="picker-roots"></div>
+      </div>
+      
+      <!-- Quality Grid Selection -->
+      <div class="picker-section">
+        <p class="picker-label">Quality</p>
+        <div class="grid-4" id="picker-qualities"></div>
+      </div>
+      
+      <!-- Tension List Selection -->
+      <div class="picker-section">
+        <p class="picker-label">Tension</p>
+        <div class="flex-wrap-gap" id="picker-tensions"></div>
+      </div>
+      
+      <!-- Extension List Selection -->
+      <div class="picker-section">
+        <p class="picker-label">Extension</p>
+        <div class="flex-wrap-gap" id="picker-extensions"></div>
+      </div>
+      
+      <!-- Bass Note Accordion -->
+      <div class="picker-section">
+        <button class="accordion-header" id="bass-accordion-header">
+          <span>Bass Note</span>
+          <span id="bass-accordion-icon">▼</span>
+        </button>
+        <div class="bass-accordion-content" id="bass-accordion-content" style="display: none;">
+          <div class="grid-6" id="bass-note-list"></div>
+        </div>
+      </div>
+      
+      <!-- Guitar Fretboard Diagram Preview -->
+      <div class="picker-section">
+        <div class="diagram-container">
+          <p class="picker-label">Guitar Shape</p>
+          <div id="diagram-box"></div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Modal Action Footer -->
+    <div class="modal-footer">
+      <button class="modal-action-btn clear" id="clear-chord-btn" data-testid="clear-chord">Clear</button>
+      <button class="modal-action-btn done" id="confirm-chord-btn" data-testid="confirm-chord">Done</button>
+    </div>
+    
+  </div>
+
+</body>
 </html>
