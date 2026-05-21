@@ -156,6 +156,19 @@ export function previewChord(chord, stroke = "arpeggio", bpm = 120) {
   playChord(chord, stroke, null, bpm);
 }
 
+// Helper to find the last played chord before the start index (for Repeat/Continue feature)
+function findLastPlayedChord(startIndex, config) {
+  const total = config.totalSlots;
+  for (let i = 1; i <= total; i++) {
+    const checkIdx = (startIndex - i + total) % total;
+    const s = config.getSlot(checkIdx);
+    if (s && !s.isContinue && s.root) {
+      return s;
+    }
+  }
+  return null;
+}
+
 /**
  * Start the sequencer playback loop
  * @param {Object} config - { bpm, stroke, loop, totalSlots, getSlot, onBeat, onEnd }
@@ -185,9 +198,15 @@ export function startSequencer(config) {
       const actualSlotIndex = currentIdx % config.totalSlots;
       const slot = config.getSlot(actualSlotIndex);
 
-      // Play chord only if it is NOT a continue slot (↳)
-      if (slot && !slot.isContinue && slot.root) {
-        playChord(slot, config.stroke, schedulerState.nextSlotTime, config.bpm);
+      if (slot) {
+        if (!slot.isContinue && slot.root) {
+          playChord(slot, config.stroke, schedulerState.nextSlotTime, config.bpm);
+        } else if (slot.isContinue) {
+          const chordToPlay = findLastPlayedChord(actualSlotIndex, config);
+          if (chordToPlay) {
+            playChord(chordToPlay, config.stroke, schedulerState.nextSlotTime, config.bpm);
+          }
+        }
       }
 
       // Trigger visual/position update callback

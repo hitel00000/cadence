@@ -484,7 +484,7 @@ function renderPicker() {
   dom.modalChordName.textContent = chordName;
   
   if (slot.isContinue) {
-    dom.modalChordSub.textContent = "이전 코드 소리를 길게 이어 연주합니다.";
+    dom.modalChordSub.textContent = "이전 코드를 한 번 더 연주합니다 (반복).";
     dom.continueToggleBtn.classList.add("active");
   } else {
     dom.modalChordSub.textContent = slot.root ? "기타 지판을 누르는 방법을 확인하세요." : "지판을 선택하여 화음을 구성해 보세요.";
@@ -733,10 +733,32 @@ function toggleContinueSlot() {
   }
 }
 
+function findLastPlayedChordFromEditor(sectionIndex, barIndex, slotIndex) {
+  const totalSlots = state.song.sections.length * 8;
+  const absoluteBarIdx = sectionIndex * 4 + barIndex;
+  const absoluteSlotIdx = absoluteBarIdx * 2 + slotIndex;
+  
+  for (let i = 1; i <= totalSlots; i++) {
+    const idx = (absoluteSlotIdx - i + totalSlots) % totalSlots;
+    const s = getSlotByAbsoluteIndex(idx);
+    if (s && !s.isContinue && s.root) {
+      return s;
+    }
+  }
+  return null;
+}
+
 function previewEditingChord() {
   const slot = getEditingSlot();
-  if (slot && slot.root && !slot.isContinue) {
-    previewChord(slot, state.song.stroke, state.song.bpm);
+  if (slot) {
+    if (!slot.isContinue && slot.root) {
+      previewChord(slot, state.song.stroke, state.song.bpm);
+    } else if (slot.isContinue && state.editing) {
+      const lastChord = findLastPlayedChordFromEditor(state.editing.sectionIndex, state.editing.barIndex, state.editing.slotIndex);
+      if (lastChord) {
+        previewChord(lastChord, state.song.stroke, state.song.bpm);
+      }
+    }
   }
 }
 
