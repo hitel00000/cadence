@@ -47,10 +47,10 @@
   - [x] `js/ui/diagram.js` 파일 생성 및 `drawChordDiagram(chord, container)` 이관
   - [x] 다이어그램 내부 SVG 드로잉 및 눈금 계산 헬퍼 격리
   - [x] `app.js` 및 Chord Picker 모달 등 지판 운지가 필요한 곳에서 임포트 호출 연동
-- [ ] **R-004**: 패턴 라이브러리 드로어 추출 (`js/ui/library.js`)
-  - [ ] `js/ui/library.js` 파일 생성 및 드로어 전용 UI 빌더 이관
-  - [ ] `renderLibraryDrawer`, `renderPatternList`, `openLibraryDrawer`, `closeLibraryDrawer` 이관
-  - [ ] 카테고리 필터링 칩 렌더링 및 드로어 내 텍스트 검색창 실시간 이벤트 바인딩 격리
+- [x] **R-004**: 패턴 라이브러리 드로어 추출 (`js/ui/library.js`)
+  - [x] `js/ui/library.js` 파일 생성 및 드로어 전용 UI 빌더 이관
+  - [x] `renderLibraryDrawer`, `renderPatternList`, `openLibraryDrawer`, `closeLibraryDrawer` 이관
+  - [x] 카테고리 필터링 칩 렌더링 및 드로어 내 텍스트 검색창 실시간 이벤트 바인딩 격리
 - [ ] **R-005**: 코드 선택 모달 추출 (`js/ui/picker.js`)
   - [ ] `js/ui/picker.js` 파일 생성 및 `openPicker`, `closePicker`, `renderPicker` 이관
   - [ ] Root/Quality/Tension/Extension 동적 격자 렌더링 및 Bass Note 아코디언 핸들러 이관
