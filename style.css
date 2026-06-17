@@ -566,7 +566,7 @@ header .pulse-dot {
   right: 0;
   z-index: 50;
   background-color: var(--card);
-  border-t: 1px solid var(--card-border);
+  border-top: 1px solid var(--card-border);
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
   max-height: 80vh;
@@ -769,6 +769,12 @@ header .pulse-dot {
   padding-bottom: 0.5rem;
   width: 100%;
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.diatonic-chips-container::-webkit-scrollbar {
+  display: none;
 }
 
 .diatonic-chip {
@@ -819,6 +825,8 @@ header .pulse-dot {
 
 .diagram-svg-box {
   color: var(--foreground);
+  max-width: 100%;
+  height: auto;
 }
 
 /* Modal Bottom Actions */
@@ -994,6 +1002,7 @@ header .pulse-dot {
   .main-content {
     padding: 0.5rem;
     min-height: 0;
+    overflow-x: hidden; /* Prevent horizontal scroll on mobile viewport */
   }
 
   .practice-focus-view {
@@ -1002,6 +1011,8 @@ header .pulse-dot {
     padding-bottom: 0.5rem;
     justify-content: flex-start;
     overflow-y: auto;
+    max-width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scroll in the practice view container */
   }
 
   /* 루프 제어 버튼 줄바꿈 해결 */
@@ -1027,12 +1038,14 @@ header .pulse-dot {
     gap: 0.625rem;
     align-items: stretch;
     width: 100%;
+    max-width: 100%;
     justify-content: center;
   }
 
   .focus-chord-card {
     padding: 1rem 0.5rem;
     gap: 0.25rem;
+    min-width: 0; /* Allow card to shrink and not expand beyond its container */
   }
 
   .focus-chord-card.current-card {
@@ -1054,12 +1067,14 @@ header .pulse-dot {
   }
 
   .focus-diagram-container {
-    min-height: 90px;
+    min-height: 80px; /* Reduced min-height to save vertical space on small screens */
     padding: 0.125rem 0;
   }
 
   .focus-diagram-container svg {
-    max-height: 90px; /* 다이어그램 높이 제한 */
+    max-width: 100%;
+    height: auto;
+    max-height: 80px; /* Reduced max-height to save vertical space on small screens */
   }
 
   .card-status-label {
@@ -1630,6 +1645,12 @@ header .pulse-dot {
   gap: 0.5rem;
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.filter-row::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-chip {
@@ -1658,7 +1679,7 @@ header .pulse-dot {
 
 .pattern-list {
   display: grid;
-  grid-template-cols: 1fr;
+  grid-template-cols: minmax(0, 1fr); /* Prevent expansion of grid track beyond viewport */
   gap: 0.75rem;
 }
 
@@ -1674,6 +1695,7 @@ header .pulse-dot {
   flex-direction: column;
   gap: 0.5rem;
   text-align: left;
+  min-width: 0; /* Prevent horizontal overflow */
 }
 
 .pattern-card:hover {
@@ -1685,18 +1707,23 @@ header .pulse-dot {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem; /* Ensure gap between title and meta difficulty badge */
+  width: 100%;
 }
 
 .pattern-card-title {
   font-weight: 600;
   font-size: 0.9375rem;
   color: var(--foreground);
+  min-width: 0; /* Allow title text to shrink/wrap */
+  word-break: break-all;
 }
 
 .pattern-card-meta {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  flex-shrink: 0; /* Do not allow difficulty badge to shrink or hide */
 }
 
 .meta-badge {
