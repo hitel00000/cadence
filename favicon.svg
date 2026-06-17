@@ -1,3 +1,34 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <defs>
+    <!-- Background Gradient (Deep dark to charcoal) -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <!-- Accent Orange Gradient (Theme Primary Colors) -->
+    <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffedd5"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <!-- Soft Glow effect -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Premium rounded square container -->
+  <rect width="180" height="180" rx="45" fill="url(#bg-grad)"/>
+  <rect x="2" y="2" width="176" height="176" rx="43" stroke="#27272a" stroke-width="4"/>
+
+  <!-- Cadence Stylized Music Note & Waveform Logo -->
+  <!-- Note Head (Rotated Ellipse) -->
+  <ellipse cx="65" cy="115" rx="20" ry="15" transform="rotate(-15 65 115)" fill="url(#orange-grad)" filter="url(#glow)"/>
+  
+  <!-- Stem -->
+  <path d="M80 112V50" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Wave-like music note flag (represents cadence/sound wave) -->
+  <path d="M80 54C105 54 105 70 135 68" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
 </svg>
