@@ -41,7 +41,8 @@ const TENSIONS = [
   { value: "sus2", label: "sus2" },
   { value: "sus4", label: "sus4" },
   { value: "7", label: "7" },
-  { value: "maj7", label: "maj7" }
+  { value: "maj7", label: "maj7" },
+  { value: "7b5", label: "7b5" }
 ];
 const EXTENSIONS = [
   { value: "", label: "—" },

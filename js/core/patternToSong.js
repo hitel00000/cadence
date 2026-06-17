@@ -50,6 +50,9 @@ export function parseChordStringToSlot(chordStr) {
   } else if (suffix === "m7" || suffix === "min7") {
     quality = "minor";
     tension = "7";
+  } else if (suffix === "m7b5" || suffix === "min7b5" || suffix === "ø") {
+    quality = "minor";
+    tension = "7b5";
   } else if (suffix === "mmaj7") {
     quality = "minor";
     tension = "maj7";

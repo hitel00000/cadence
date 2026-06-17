@@ -38,6 +38,7 @@ export function getDbKey(chord) {
     
     if (chord.tension === "7") key += "7";
     else if (chord.tension === "maj7") key += "maj7";
+    else if (chord.tension === "7b5") key += "7b5";
   }
   return key;
 }
@@ -58,6 +59,7 @@ export function getDisplayString(chord) {
     
     if (chord.tension === "7") text += "7";
     else if (chord.tension === "maj7") text += "maj7";
+    else if (chord.tension === "7b5") text += "7b5";
   }
   
   if (chord.extension) {
@@ -156,6 +158,10 @@ export function generateFallbackVoicing(chord) {
     if (!intervals.includes(seventh)) intervals.push(seventh);
   } else if (chord.tension === "maj7") {
     if (!intervals.includes(11)) intervals.push(11);
+  } else if (chord.tension === "7b5") {
+    // replace fifth (7) with flat fifth (6)
+    intervals = intervals.map(x => x === 7 ? 6 : x);
+    if (!intervals.includes(10)) intervals.push(10);
   }
   
   // 4. Add extensions
@@ -221,6 +227,7 @@ export function resolveChordNotes(chord) {
 export const chordDb = {
   "C": {"frets":[-1,3,2,0,1,0]},
   "Cm": {"frets":[-1,3,5,5,4,3],"barre":3,"baseFret":3},
+  "Cm7": {"frets":[-1,3,5,3,4,3],"barre":3,"baseFret":3},
   "C7": {"frets":[-1,3,2,3,1,0]},
   "Cmaj7": {"frets":[-1,3,2,0,0,0]},
   "Csus2": {"frets":[-1,3,0,0,1,3]},
@@ -229,14 +236,17 @@ export const chordDb = {
   "Cdim": {"frets":[-1,3,4,5,4,-1],"baseFret":1},
   "C#": {"frets":[-1,4,6,6,6,4],"barre":4,"baseFret":4},
   "C#m": {"frets":[-1,4,6,6,5,4],"barre":4,"baseFret":4},
+  "C#m7": {"frets":[-1,4,6,4,5,4],"barre":4,"baseFret":4},
   "C#7": {"frets":[-1,4,3,4,2,-1],"baseFret":4},
   "C#maj7": {"frets":[-1,4,6,5,6,4],"barre":4,"baseFret":4},
   "Db": {"frets":[-1,4,6,6,6,4],"barre":4,"baseFret":4},
   "Dbm": {"frets":[-1,4,6,6,5,4],"barre":4,"baseFret":4},
+  "Dbm7": {"frets":[-1,4,6,4,5,4],"barre":4,"baseFret":4},
   "Db7": {"frets":[-1,4,3,4,2,-1],"baseFret":4},
   "Dbmaj7": {"frets":[-1,4,6,5,6,4],"barre":4,"baseFret":4},
   "D": {"frets":[-1,-1,0,2,3,2]},
   "Dm": {"frets":[-1,-1,0,2,3,1]},
+  "Dm7": {"frets":[-1,-1,0,2,1,1]},
   "D7": {"frets":[-1,-1,0,2,1,2]},
   "Dmaj7": {"frets":[-1,-1,0,2,2,2]},
   "Dsus2": {"frets":[-1,-1,0,2,3,0]},
@@ -245,14 +255,17 @@ export const chordDb = {
   "Ddim": {"frets":[-1,-1,0,1,3,1]},
   "D#": {"frets":[-1,6,8,8,8,6],"barre":6,"baseFret":6},
   "D#m": {"frets":[6,8,8,6,6,6],"barre":6,"baseFret":6},
+  "D#m7": {"frets":[-1,6,8,6,7,6],"barre":6,"baseFret":6},
   "D#7": {"frets":[-1,6,5,6,4,-1],"baseFret":6},
   "D#maj7": {"frets":[-1,6,8,7,8,6],"barre":6,"baseFret":6},
   "Eb": {"frets":[-1,6,8,8,8,6],"barre":6,"baseFret":6},
   "Ebm": {"frets":[6,8,8,6,6,6],"barre":6,"baseFret":6},
+  "Ebm7": {"frets":[-1,6,8,6,7,6],"barre":6,"baseFret":6},
   "Eb7": {"frets":[-1,6,5,6,4,-1],"baseFret":6},
   "Ebmaj7": {"frets":[-1,6,8,7,8,6],"barre":6,"baseFret":6},
   "E": {"frets":[0,2,2,1,0,0]},
   "Em": {"frets":[0,2,2,0,0,0]},
+  "Em7": {"frets":[0,2,0,0,0,0]},
   "E7": {"frets":[0,2,0,1,0,0]},
   "Emaj7": {"frets":[0,2,1,1,0,0]},
   "Esus2": {"frets":[0,2,4,4,0,0]},
@@ -261,6 +274,7 @@ export const chordDb = {
   "Edim": {"frets":[0,1,2,0,-1,3]},
   "F": {"frets":[1,3,3,2,1,1],"barre":1,"baseFret":1},
   "Fm": {"frets":[1,3,3,1,1,1],"barre":1,"baseFret":1},
+  "Fm7": {"frets":[1,3,1,1,1,1],"barre":1,"baseFret":1},
   "F7": {"frets":[1,3,1,2,1,1],"barre":1,"baseFret":1},
   "Fmaj7": {"frets":[-1,-1,3,2,1,0]},
   "Fsus2": {"frets":[1,3,3,2,1,1],"barre":1,"baseFret":1},
@@ -269,14 +283,17 @@ export const chordDb = {
   "Fdim": {"frets":[-1,-1,3,4,3,-1],"baseFret":1},
   "F#": {"frets":[2,4,4,3,2,2],"barre":2,"baseFret":2},
   "F#m": {"frets":[2,4,4,2,2,2],"barre":2,"baseFret":2},
+  "F#m7": {"frets":[2,4,2,2,2,2],"barre":2,"baseFret":2},
   "F#7": {"frets":[2,4,2,3,2,2],"barre":2,"baseFret":2},
   "F#maj7": {"frets":[2,4,3,3,2,2],"barre":2,"baseFret":2},
   "Gb": {"frets":[2,4,4,3,2,2],"barre":2,"baseFret":2},
   "Gbm": {"frets":[2,4,4,2,2,2],"barre":2,"baseFret":2},
+  "Gbm7": {"frets":[2,4,2,2,2,2],"barre":2,"baseFret":2},
   "Gb7": {"frets":[2,4,2,3,2,2],"barre":2,"baseFret":2},
   "Gbmaj7": {"frets":[2,4,3,3,2,2],"barre":2,"baseFret":2},
   "G": {"frets":[3,2,0,0,0,3]},
   "Gm": {"frets":[3,5,5,3,3,3],"barre":3,"baseFret":3},
+  "Gm7": {"frets":[3,5,3,3,3,3],"barre":3,"baseFret":3},
   "G7": {"frets":[3,2,0,0,0,1]},
   "Gmaj7": {"frets":[3,2,0,0,0,2]},
   "Gsus2": {"frets":[3,2,0,0,3,3]},
@@ -285,14 +302,17 @@ export const chordDb = {
   "Gdim": {"frets":[3,4,5,3,-1,-1],"baseFret":3},
   "G#": {"frets":[4,6,6,5,4,4],"barre":4,"baseFret":4},
   "G#m": {"frets":[4,6,6,4,4,4],"barre":4,"baseFret":4},
+  "G#m7": {"frets":[4,6,4,4,4,4],"barre":4,"baseFret":4},
   "G#7": {"frets":[4,6,4,5,4,4],"barre":4,"baseFret":4},
   "G#maj7": {"frets":[4,6,5,5,4,4],"barre":4,"baseFret":4},
   "Ab": {"frets":[4,6,6,5,4,4],"barre":4,"baseFret":4},
   "Abm": {"frets":[4,6,6,4,4,4],"barre":4,"baseFret":4},
+  "Abm7": {"frets":[4,6,4,4,4,4],"barre":4,"baseFret":4},
   "Ab7": {"frets":[4,6,4,5,4,4],"barre":4,"baseFret":4},
   "Abmaj7": {"frets":[4,6,5,5,4,4],"barre":4,"baseFret":4},
   "A": {"frets":[-1,0,2,2,2,0]},
   "Am": {"frets":[-1,0,2,2,1,0]},
+  "Am7": {"frets":[-1,0,2,0,1,0]},
   "A7": {"frets":[-1,0,2,0,2,0]},
   "Amaj7": {"frets":[-1,0,2,1,2,0]},
   "Asus2": {"frets":[-1,0,2,2,0,0]},
@@ -301,14 +321,18 @@ export const chordDb = {
   "Adim": {"frets":[-1,0,1,2,1,-1]},
   "A#": {"frets":[-1,1,3,3,3,1],"barre":1,"baseFret":1},
   "A#m": {"frets":[-1,1,3,3,2,1],"barre":1,"baseFret":1},
+  "A#m7": {"frets":[-1,1,3,1,2,1],"barre":1,"baseFret":1},
   "A#7": {"frets":[-1,1,3,1,3,1],"barre":1,"baseFret":1},
   "A#maj7": {"frets":[-1,1,3,2,3,1],"barre":1,"baseFret":1},
   "Bb": {"frets":[-1,1,3,3,3,1],"barre":1,"baseFret":1},
   "Bbm": {"frets":[-1,1,3,3,2,1],"barre":1,"baseFret":1},
+  "Bbm7": {"frets":[-1,1,3,1,2,1],"barre":1,"baseFret":1},
   "Bb7": {"frets":[-1,1,3,1,3,1],"barre":1,"baseFret":1},
   "Bbmaj7": {"frets":[-1,1,3,2,3,1],"barre":1,"baseFret":1},
   "B": {"frets":[-1,2,4,4,4,2],"barre":2,"baseFret":2},
   "Bm": {"frets":[-1,2,4,4,3,2],"barre":2,"baseFret":2},
+  "Bm7": {"frets":[-1,2,4,2,3,2],"barre":2,"baseFret":2},
+  "Bm7b5": {"frets":[-1,2,3,2,3,-1],"baseFret":2},
   "B7": {"frets":[-1,2,1,2,0,2]},
   "Bmaj7": {"frets":[-1,2,4,3,4,2],"baseFret":2},
   "Bsus2": {"frets":[-1,2,4,4,2,2],"baseFret":2},
