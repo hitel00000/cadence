@@ -15,6 +15,11 @@ import {
   seekSequencer, 
   isSequencerPlaying 
 } from './audio.js';
+import { 
+  loadSong as storageLoadSong, 
+  saveSong as storageSaveSong 
+} from './core/storage.js';
+import { patternToSong } from './core/patternToSong.js';
 
 // SVG Icons markup
 const ICONS = {
@@ -65,7 +70,10 @@ let state = {
     isPlaying: false,
     currentSlot: 0
   },
-  editing: null // { sectionIndex, barIndex, slotIndex }
+  editing: null, // { sectionIndex, barIndex, slotIndex }
+  books: [],
+  currentPattern: null,
+  currentKey: "C"
 };
 
 let showBassNoteAccordion = false;
@@ -78,6 +86,8 @@ const dom = {
   bpmDown: null,
   bpmUp: null,
   strokeSelector: null,
+  patternSelect: null,
+  keyChips: null,
   loopToggle: null,
   seekFirst: null,
   seekPrev: null,
@@ -111,14 +121,19 @@ const dom = {
 document.addEventListener("DOMContentLoaded", () => {
   cacheDOMElements();
   loadSong();
+  loadPatterns();
   renderHeader();
   renderToolbar();
   renderEditor();
+  renderKeyChips();
   bindEvents();
 });
 
 // Cache DOM references
 function cacheDOMElements() {
+  dom.patternSelect = document.getElementById("pattern-select");
+  dom.keyChips = document.getElementById("key-chips");
+  
   dom.sectionCount = document.querySelector("[data-testid='section-count']");
   dom.autoSavedText = document.querySelector(".status-container span:last-child");
   
@@ -192,61 +207,19 @@ function createDefaultSong() {
 }
 
 function loadSong() {
-  try {
-    const saved = localStorage.getItem("cadence_song");
-    if (saved) {
-      state.song = JSON.parse(saved);
-      
-      // Validate structure roughly
-      if (!state.song.sections || state.song.sections.length === 0) {
-        state.song = createDefaultSong();
-        return;
-      }
-      
-      // Migrate legacy database schemas (e.g. measures -> bars, null/hold slots -> slot objects)
-      state.song.sections.forEach(section => {
-        if (section.measures && !section.bars) {
-          section.bars = section.measures;
-          delete section.measures;
-        }
-        
-        if (section.bars) {
-          section.bars.forEach(bar => {
-            if (bar.slots) {
-              bar.slots = bar.slots.map(slot => {
-                if (slot === null) {
-                  return createEmptySlot();
-                }
-                if (slot.hold) {
-                  return createContinueSlot();
-                }
-                return {
-                  root: slot.root ?? null,
-                  quality: slot.quality ?? "major",
-                  tension: slot.tension ?? "",
-                  extension: slot.extension ?? "",
-                  bassNote: slot.bassNote ?? null,
-                  isContinue: !!slot.isContinue
-                };
-              });
-            } else {
-              bar.slots = [createEmptySlot(), createEmptySlot()];
-            }
-          });
-        }
-      });
-    } else {
-      state.song = createDefaultSong();
-    }
-  } catch (e) {
-    console.error("Failed to load and migrate song from localStorage:", e);
+  const loaded = storageLoadSong();
+  if (loaded) {
+    state.song = loaded;
+  } else {
     state.song = createDefaultSong();
   }
 }
 
 function saveSong() {
+  if (state.currentPattern) return; // Don't save book patterns
+  
   try {
-    localStorage.setItem("cadence_song", JSON.stringify(state.song));
+    storageSaveSong(state.song);
     
     // Flash auto-saved status indicator
     if (dom.autoSavedText) {
@@ -1045,4 +1018,133 @@ function bindEvents() {
       seekNext();
     }
   });
+
+  // Pattern library selection event
+  if (dom.patternSelect) {
+    dom.patternSelect.addEventListener("change", handlePatternSelectChange);
+  }
+}
+
+// ─── Pattern Library & Transposition Helpers ───
+
+async function loadPatterns() {
+  try {
+    const response = await fetch('./static/books/guitar-chord-recipes.json');
+    if (response.ok) {
+      const book = await response.json();
+      state.books = [book];
+      populatePatternSelect();
+    }
+  } catch (e) {
+    console.error("Failed to load static books:", e);
+  }
+}
+
+function populatePatternSelect() {
+  if (!dom.patternSelect) return;
+  
+  dom.patternSelect.innerHTML = '<option value="">-- 내 자유 연주곡 --</option>';
+  
+  state.books.forEach(book => {
+    const optGroup = document.createElement("optgroup");
+    optGroup.label = book.bookTitle;
+    
+    book.patterns.forEach(pattern => {
+      const opt = document.createElement("option");
+      opt.value = `${book.bookId}:${pattern.id}`;
+      opt.textContent = pattern.title;
+      optGroup.appendChild(opt);
+    });
+    
+    dom.patternSelect.appendChild(optGroup);
+  });
+}
+
+function renderKeyChips() {
+  if (!dom.keyChips) return;
+  
+  const keys = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+  
+  dom.keyChips.innerHTML = "";
+  
+  keys.forEach(key => {
+    const chip = document.createElement("button");
+    chip.className = `key-chip${state.currentKey === key ? " active" : ""}`;
+    chip.textContent = key;
+    
+    // Disable key chips if no pattern is selected
+    if (!state.currentPattern) {
+      chip.disabled = true;
+      chip.style.opacity = "0.5";
+      chip.style.cursor = "not-allowed";
+    }
+    
+    chip.addEventListener("click", () => {
+      if (!state.currentPattern) return;
+      state.currentKey = key;
+      renderKeyChips();
+      applyPatternChange();
+    });
+    
+    dom.keyChips.appendChild(chip);
+  });
+}
+
+function applyPatternChange() {
+  if (!state.currentPattern) return;
+  
+  const newSong = patternToSong(state.currentPattern, state.currentKey);
+  if (newSong) {
+    state.song = newSong;
+    
+    // Update BPM input display
+    if (dom.bpmInput) {
+      dom.bpmInput.value = state.song.bpm;
+    }
+    
+    // If playing, restart sequencer to apply transposition immediately
+    if (state.playback.isPlaying) {
+      stopSequencer();
+      startPlayback();
+    }
+    
+    renderToolbar();
+    renderEditor();
+  }
+}
+
+function handlePatternSelectChange(e) {
+  const value = e.target.value;
+  if (!value) {
+    state.currentPattern = null;
+    state.currentKey = "C";
+    loadSong(); // Reload custom song
+    
+    // Update BPM input
+    if (dom.bpmInput && state.song) {
+      dom.bpmInput.value = state.song.bpm;
+    }
+    
+    // If playing, restart sequencer
+    if (state.playback.isPlaying) {
+      stopSequencer();
+      startPlayback();
+    }
+    
+    renderToolbar();
+    renderEditor();
+  } else {
+    const [bookId, patternId] = value.split(":");
+    const book = state.books.find(b => b.bookId === bookId);
+    if (book) {
+      const pattern = book.patterns.find(p => p.id === patternId);
+      if (pattern) {
+        state.currentPattern = pattern;
+        state.currentKey = pattern.defaultKey || "C";
+        applyPatternChange();
+      }
+    }
+  }
+  
+  renderKeyChips();
 }

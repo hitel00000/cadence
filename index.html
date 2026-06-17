@@ -41,6 +41,24 @@
     </div>
   </header>
 
+  <!-- Pattern Library & Key Selector Bar -->
+  <div class="library-bar" id="library-bar">
+    <div class="library-container">
+      <div class="selector-group">
+        <label for="pattern-select">패턴:</label>
+        <select id="pattern-select" class="pattern-select">
+          <option value="">-- 기본 연습곡 --</option>
+        </select>
+      </div>
+      <div class="key-selector-group">
+        <span class="key-label">키(Key):</span>
+        <div class="key-chips" id="key-chips">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Transport Control Bar (Playback Toolbar) -->
   <div class="transport-bar" data-testid="transport-bar">
     <div class="transport-container">
