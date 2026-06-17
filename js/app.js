@@ -24,6 +24,7 @@ import {
 import { patternToSong } from './core/patternToSong.js';
 import { ICONS } from './ui/icons.js';
 import { dom, cacheDOMElements } from './ui/dom.js';
+import { store, state } from './core/state.js';
 
 
 
@@ -53,25 +54,7 @@ const EXTENSIONS = [
 const STROKE_TEXT = { strong: "Strong", soft: "Soft", arpeggio: "Arpeggio" };
 const STROKE_SYMBOL = { strong: "↓↓", soft: "↕↕", arpeggio: "~" };
 
-// Global Application State
-let state = {
-  song: null,
-  playback: {
-    isPlaying: false,
-    currentSlot: 0,
-    loopABActive: false,
-    loopStartBar: 0,
-    loopEndBar: 0,
-    wakeLockEnabled: true
-  },
-  editing: null, // { sectionIndex, barIndex, slotIndex }
-  books: [],
-  currentPattern: null,
-  currentKey: "C",
-  uiMode: "practice", // "practice" or "edit"
-  searchQuery: "",
-  selectedCategory: "all"
-};
+
 
 let showBassNoteAccordion = false;
 

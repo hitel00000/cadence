@@ -36,11 +36,11 @@
   - [x] `cacheDOMElements` 전담 함수 정의 및 내보내기
   - [x] `js/app.js`에서 DOM 캐시 선언부 제거 및 신규 모듈 임포트 연동
   - [x] 아이콘 및 초기 DOM 셋팅 연동 상태 복구 검증
-- [ ] **R-002**: 전역 상태 관리 모듈 구축 (`js/core/state.js` - Pub/Sub 패턴)
-  - [ ] `js/core/state.js` 파일 생성 및 글로벌 `state` 선언
-  - [ ] 상태 구독(`subscribe`), 발행(`publish`) 이벤트 처리 메커니즘 구현
-  - [ ] 핵심 액션(BPM 업데이트, 악기 전환, 플레이 위치 이동, 재생 여부 토글 등) 구현
-  - [ ] `app.js`의 직관적인 `state.xxx = yyy` 직접 변경부들을 스토어 액션 및 구독 구조로 마이그레이션
+- [x] **R-002**: 전역 상태 관리 모듈 구축 (`js/core/state.js` - Pub/Sub 패턴)
+  - [x] `js/core/state.js` 파일 생성 및 글로벌 `state` 선언
+  - [x] 상태 구독(`subscribe`), 발행(`publish`) 이벤트 처리 메커니즘 구현
+  - [x] 핵심 액션(BPM 업데이트, 악기 전환, 플레이 위치 이동, 재생 여부 토글 등) 구현
+  - [x] `app.js`의 직관적인 `state.xxx = yyy` 직접 변경부들을 스토어 액션 및 구독 구조로 마이그레이션
 
 ### 🟪 2단계: 독립 UI 컴포넌트 분리
 - [ ] **R-003**: 운지 다이어그램 모듈 추출 (`js/ui/diagram.js`)
