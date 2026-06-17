@@ -2,8 +2,8 @@
 
 Whenever you are asked to design, build, modify, or debug any UI, HTML, or CSS styles in this repository, you MUST follow these instructions:
 
-1. Read and strictly follow the StyleSeed design language rules specified in [STYLESEED_FULL.md](file:///C:/Users/jeongwoong/dev/cadence/docs/STYLESEED_FULL.md).
-2. Read and respect the responsive layout and interaction flow guidelines in [UX_GUIDELINES.md](file:///C:/Users/jeongwoong/dev/cadence/docs/UX_GUIDELINES.md).
-3. Before finishing your work, self-verify your UI changes using the Verification Checklist in [UX_GUIDELINES.md](file:///C:/Users/jeongwoong/dev/cadence/docs/UX_GUIDELINES.md).
+1. Read and strictly follow the StyleSeed design language rules specified in `docs/STYLESEED_FULL.md`.
+2. Read and respect the responsive layout and interaction flow guidelines in `docs/UX_GUIDELINES.md`.
+3. Before finishing your work, self-verify your UI changes using the Verification Checklist in `docs/UX_GUIDELINES.md`.
 
 Always prioritize grayscale base layouts with a single primary accent color (`--primary`), maintain card-based content structures, ensure touch targets are at least 44×44px, and check for responsive viewport clipping on mobile screen dimensions (<= 600px).
