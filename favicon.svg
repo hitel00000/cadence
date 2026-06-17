@@ -22,13 +22,13 @@
   <rect width="180" height="180" rx="45" fill="url(#bg-grad)"/>
   <rect x="2" y="2" width="176" height="176" rx="43" stroke="#27272a" stroke-width="4"/>
 
-  <!-- Cadence Stylized Music Note & Waveform Logo -->
+  <!-- Cadence Corrected Eighth Note Logo -->
   <!-- Note Head (Rotated Ellipse) -->
-  <ellipse cx="65" cy="115" rx="20" ry="15" transform="rotate(-15 65 115)" fill="url(#orange-grad)" filter="url(#glow)"/>
+  <ellipse cx="60" cy="120" rx="18" ry="13" transform="rotate(-25 60 120)" fill="url(#orange-grad)" filter="url(#glow)"/>
   
   <!-- Stem -->
-  <path d="M80 112V50" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M75 120V45" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
   
-  <!-- Wave-like music note flag (represents cadence/sound wave) -->
-  <path d="M80 54C105 54 105 70 135 68" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <!-- Corrected Classical Eighth Note Flag (Fill-based vector tail) -->
+  <path d="M75 45C100 48 120 70 112 102C106 88 92 78 75 75Z" fill="url(#orange-grad)" filter="url(#glow)"/>
 </svg>
