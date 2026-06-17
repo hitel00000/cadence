@@ -31,11 +31,11 @@
 * 상세 설명: [docs/refactoring-plan.md](docs/refactoring-plan.md)
 
 ### 🟪 1단계: 코어 분리 및 상태 모듈화
-- [ ] **R-001**: DOM 캐시 분리 (`js/ui/dom.js`)
-  - [ ] `js/ui/dom.js` 파일 생성 및 `dom` 캐시 객체 내보내기 (`export const dom = {...}`)
-  - [ ] `cacheDOMElements` 전담 함수 정의 및 내보내기
-  - [ ] `js/app.js`에서 DOM 캐시 선언부 제거 및 신규 모듈 임포트 연동
-  - [ ] 아이콘 및 초기 DOM 셋팅 연동 상태 복구 검증
+- [x] **R-001**: DOM 캐시 분리 (`js/ui/dom.js`)
+  - [x] `js/ui/dom.js` 파일 생성 및 `dom` 캐시 객체 내보내기 (`export const dom = {...}`)
+  - [x] `cacheDOMElements` 전담 함수 정의 및 내보내기
+  - [x] `js/app.js`에서 DOM 캐시 선언부 제거 및 신규 모듈 임포트 연동
+  - [x] 아이콘 및 초기 DOM 셋팅 연동 상태 복구 검증
 - [ ] **R-002**: 전역 상태 관리 모듈 구축 (`js/core/state.js` - Pub/Sub 패턴)
   - [ ] `js/core/state.js` 파일 생성 및 글로벌 `state` 선언
   - [ ] 상태 구독(`subscribe`), 발행(`publish`) 이벤트 처리 메커니즘 구현
