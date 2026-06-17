@@ -332,6 +332,10 @@ header .pulse-dot {
   transition: all 0.15s ease;
 }
 
+.settings-toggle-btn {
+  display: none !important;
+}
+
 .play-btn:hover {
   color: var(--foreground);
   background-color: var(--secondary);
@@ -945,20 +949,21 @@ header .pulse-dot {
   }
 
   .transport-container {
-    display: grid;
-    grid-template-columns: auto minmax(5.5rem, 1fr) auto minmax(4.75rem, 1fr) minmax(4.75rem, 1fr);
+    display: flex !important;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0 0.25rem;
+    width: 100%;
+    padding: 0 0.5rem;
+    gap: 0.5rem;
   }
 
-  /* 재생 버튼 그룹 1행 배치 */
+  /* 재생 버튼 그룹 배치 */
   .play-controls {
     margin-left: 0 !important;
-    width: 100%;
-    grid-column: 1 / -1;
+    width: auto !important;
+    display: flex;
     justify-content: center;
-    order: 1;
+    order: 0 !important;
     gap: 0.375rem;
   }
 
@@ -980,51 +985,41 @@ header .pulse-dot {
 
   /* 재생 위치 디스플레이 가독성 조정 */
   .position-display {
-    order: 2;
-    width: auto;
+    order: -1 !important;
+    width: auto !important;
     text-align: left;
-    font-size: 0.75rem;
-    margin-left: 0;
-  }
-
-  /* 세팅 컨트롤 2행 배치 */
-  .bpm-controls {
-    order: 3;
-    width: 100%;
-    min-width: 0;
-    padding: 0.125rem 0.375rem;
-    justify-content: center;
-  }
-
-  .bpm-input {
-    width: 2rem;
     font-size: 0.8125rem;
+    margin-left: 0;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    min-width: 2.5rem;
   }
 
-  .bpm-label {
-    order: 4;
-    font-size: 0.6875rem;
-    margin-right: 0.125rem;
+  /* 모바일 세팅 토글 버튼 */
+  .settings-toggle-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--muted-foreground);
+    background: none;
+    border: none;
+    order: 1 !important;
+    cursor: pointer;
+    transition: color 0.15s ease;
   }
 
-  .stroke-selector {
-    order: 5;
-    width: 100%;
-    min-width: 0;
-    padding: 0.3125rem 0.5rem;
+  .settings-toggle-btn:hover {
+    color: var(--foreground);
   }
 
-  .instrument-selector {
-    order: 6;
-    width: 100%;
-    min-width: 0;
-    padding: 0.3125rem 0.5rem;
-  }
-
-  .loop-toggle {
-    order: 7;
-    flex-shrink: 0;
-    padding: 0.3125rem;
+  /* 툴바 내 2차 세팅 요소들은 모바일에서 숨김 (설정 서랍으로 임시 이관됨) */
+  .transport-container > .bpm-controls,
+  .transport-container > .bpm-label,
+  .transport-container > .stroke-selector,
+  .transport-container > .instrument-selector,
+  .transport-container > .loop-toggle {
+    display: none !important;
   }
 
   /* 메인 콘텐츠 및 연습 모드 세로 높이 오버플로우 해결 (StyleSeed 여백 규칙 준수) */
@@ -1044,16 +1039,94 @@ header .pulse-dot {
     overflow-x: hidden; /* Prevent horizontal scroll in the practice view container */
   }
 
-  /* 루프 제어 버튼 줄바꿈 해결 */
+  /* 루프 제어 설정판을 모바일에서는 슬라이드 업 설정 서랍(Settings Drawer)으로 변경 */
   .focus-loop-controls {
-    max-width: 100%;
-    padding: 0.75rem 1rem;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--card);
+    border-top: 1px solid var(--border);
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding: 1.5rem 1.25rem;
+    z-index: 45;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .focus-loop-controls.open {
+    transform: translateY(0);
+  }
+
+  /* 모바일 설정 통합 컨테이너 */
+  .mobile-settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: 100%;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .settings-drawer-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--foreground);
+    margin-bottom: 0.25rem;
+  }
+
+  .mobile-settings-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .mobile-settings-row .bpm-controls {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    background-color: var(--secondary);
+    border-radius: var(--radius-md);
+    padding: 0.5rem;
+    align-items: center;
+    height: 2.75rem;
+  }
+
+  .mobile-settings-row .stroke-selector,
+  .mobile-settings-row .instrument-selector,
+  .mobile-settings-row .loop-toggle {
+    grid-column: span 1;
+    width: 100%;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: 0.5rem;
+    background-color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .mobile-settings-row .loop-toggle::after {
+    content: "전체 반복 (Loop)";
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
 
   .loop-ab-btn, .wake-lock-btn {
     font-size: 0.75rem;
-    height: 2.5rem;
+    height: 2.75rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;

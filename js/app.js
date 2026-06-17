@@ -327,4 +327,121 @@ function bindEvents() {
     renderKeyChips,
     applyPatternChange
   });
+
+  // Mobile layout & Settings drawer toggle setup
+  setupMobileLayout();
+  window.addEventListener("resize", setupMobileLayout);
+
+  const settingsBtn = document.getElementById("settings-toggle-btn");
+  if (settingsBtn) {
+    settingsBtn.addEventListener("click", () => {
+      const loopControls = document.getElementById("focus-loop-controls");
+      if (loopControls) {
+        const isOpen = loopControls.classList.toggle("open");
+        toggleSettingsBackdrop(isOpen);
+      }
+    });
+  }
+}
+
+function setupMobileLayout() {
+  const isMobile = window.innerWidth <= 600;
+  const loopControls = document.getElementById("focus-loop-controls");
+  const bpmControls = document.querySelector(".bpm-controls");
+  const bpmLabel = document.querySelector(".bpm-label");
+  const strokeSel = document.querySelector("[data-testid='stroke-selector']");
+  const instSel = document.querySelector("[data-testid='instrument-selector']");
+  const loopTgl = document.querySelector("[data-testid='loop-toggle']");
+  const keySelector = document.querySelector(".key-selector-group");
+  
+  if (isMobile && loopControls) {
+    // Create mobile-settings-container inside the focus loop controls card
+    let container = document.getElementById("mobile-settings-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "mobile-settings-container";
+      container.className = "mobile-settings-container";
+      loopControls.insertBefore(container, loopControls.firstChild);
+      
+      const title = document.createElement("h3");
+      title.className = "settings-drawer-title";
+      title.textContent = "⚙️ 플레이어 설정";
+      container.appendChild(title);
+    }
+    
+    // Move controls into the container
+    if (keySelector && keySelector.parentElement !== container) {
+      container.appendChild(keySelector);
+    }
+    
+    let row = document.getElementById("mobile-settings-row");
+    if (!row) {
+      row = document.createElement("div");
+      row.id = "mobile-settings-row";
+      row.className = "mobile-settings-row";
+      container.appendChild(row);
+    }
+    
+    if (bpmControls && bpmControls.parentElement !== row) row.appendChild(bpmControls);
+    if (strokeSel && strokeSel.parentElement !== row) row.appendChild(strokeSel);
+    if (instSel && instSel.parentElement !== row) row.appendChild(instSel);
+    if (loopTgl && loopTgl.parentElement !== row) row.appendChild(loopTgl);
+  } else {
+    // Desktop view: Restore elements to original positions
+    const transportContainer = document.querySelector(".transport-container");
+    const playControls = document.querySelector(".play-controls");
+    const libraryContainer = document.querySelector(".library-container");
+    
+    if (keySelector && libraryContainer && keySelector.parentElement !== libraryContainer) {
+      libraryContainer.appendChild(keySelector);
+    }
+    if (transportContainer && playControls) {
+      if (bpmControls && bpmControls.parentElement !== transportContainer) {
+        transportContainer.insertBefore(bpmControls, playControls);
+      }
+      if (strokeSel && strokeSel.parentElement !== transportContainer) {
+        transportContainer.insertBefore(strokeSel, playControls);
+      }
+      if (instSel && instSel.parentElement !== transportContainer) {
+        transportContainer.insertBefore(instSel, playControls);
+      }
+      if (loopTgl && loopTgl.parentElement !== transportContainer) {
+        transportContainer.insertBefore(loopTgl, playControls);
+      }
+    }
+    
+    const container = document.getElementById("mobile-settings-container");
+    if (container) container.remove();
+  }
+}
+
+function toggleSettingsBackdrop(show) {
+  let backdrop = document.getElementById("settings-backdrop");
+  if (show) {
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.id = "settings-backdrop";
+      backdrop.className = "drawer-backdrop";
+      document.body.appendChild(backdrop);
+      // Force reflow
+      backdrop.offsetWidth;
+      backdrop.addEventListener("click", () => {
+        const loopControls = document.getElementById("focus-loop-controls");
+        if (loopControls) {
+          loopControls.classList.remove("open");
+          toggleSettingsBackdrop(false);
+        }
+      });
+    }
+    backdrop.classList.add("open");
+  } else {
+    if (backdrop) {
+      backdrop.classList.remove("open");
+      setTimeout(() => {
+        if (backdrop && !backdrop.classList.contains("open")) {
+          backdrop.remove();
+        }
+      }, 300);
+    }
+  }
 }
