@@ -175,20 +175,33 @@ export function playChord(chord, stroke, startTime, bpm = 120) {
     });
   } else if (stroke === "strong") {
     const volume = 0.22;
-    // Down strum (low strings to high strings, index 0 to 5)
+    // 1. Down Strum (t = 0 beats)
     notes.forEach((note, si) => {
       if (note < 0) return;
       const freq = midiToFreq(note);
-      const t = start + si * 0.015;
+      const t = start + si * 0.012;
       pluckString(ctx, freq, t, volume, 1.4);
     });
-    // Up strum (high strings to low strings, reverse index)
+    // 2. Up Strum (t = 0.5 beats)
     [...notes].reverse().forEach((note, si) => {
-      const origSi = 5 - si;
       if (note < 0) return;
       const freq = midiToFreq(note);
-      const t = start + beatSec * 0.5 + si * 0.012;
-      pluckString(ctx, freq, t, volume * 0.6, 1.0);
+      const t = start + beatSec * 0.5 + si * 0.010;
+      pluckString(ctx, freq, t, volume * 0.5, 1.0);
+    });
+    // 3. Down Strum (t = 1.0 beats)
+    notes.forEach((note, si) => {
+      if (note < 0) return;
+      const freq = midiToFreq(note);
+      const t = start + beatSec * 1.0 + si * 0.012;
+      pluckString(ctx, freq, t, volume * 0.75, 1.3);
+    });
+    // 4. Up Strum (t = 1.5 beats)
+    [...notes].reverse().forEach((note, si) => {
+      if (note < 0) return;
+      const freq = midiToFreq(note);
+      const t = start + beatSec * 1.5 + si * 0.010;
+      pluckString(ctx, freq, t, volume * 0.55, 1.0);
     });
   } else {
     // "soft" down strum
