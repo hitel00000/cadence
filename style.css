@@ -1320,6 +1320,10 @@ header .pulse-dot {
     font-size: 0.75rem;
     padding: 0.375rem 0.625rem;
   }
+  .save-pattern-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+  }
   .key-selector-group {
     flex-direction: row;
     align-items: center;
@@ -1415,6 +1419,28 @@ header .pulse-dot {
 .open-library-btn:hover {
   background-color: var(--muted);
   border-color: var(--primary-border);
+}
+
+.save-pattern-btn {
+  background-color: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.5rem 1.25rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.save-pattern-btn:hover {
+  opacity: 0.9;
+  box-shadow: var(--shadow-md);
 }
 
 .current-pattern-title {

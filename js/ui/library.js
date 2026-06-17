@@ -4,6 +4,8 @@
 
 import { dom } from './dom.js';
 import { state } from '../core/state.js';
+import { loadUserPatterns, saveUserPatterns } from '../core/storage.js';
+import { getDisplayString } from '../chordDb.js';
 
 let callbacks = {};
 
@@ -40,16 +42,80 @@ export function initLibraryDrawer(cb) {
       renderPatternList();
     });
   }
+  
+  // Save current custom progression to library
+  if (dom.savePatternBtn) {
+    dom.savePatternBtn.addEventListener("click", () => {
+      if (!state.song) return;
+      
+      const defaultTitle = state.currentPattern ? state.currentPattern.title + " (복사본)" : "나만의 코드 진행";
+      const title = prompt("저장할 패턴의 이름을 입력해주세요:", defaultTitle);
+      if (!title || !title.trim()) return;
+      
+      const chords = [];
+      if (state.song.sections && state.song.sections[0] && state.song.sections[0].bars) {
+        state.song.sections[0].bars.forEach(bar => {
+          bar.slots.forEach(slot => {
+            chords.push(getDisplayString(slot));
+          });
+        });
+      }
+      
+      const hasChords = chords.some(c => c !== "—" && c !== "↳");
+      if (!hasChords) {
+        alert("비어 있는 진행은 저장할 수 없습니다.");
+        return;
+      }
+      
+      const newPattern = {
+        id: "user-pattern-" + Date.now(),
+        title: title.trim(),
+        category: "내가 만든 패턴",
+        defaultKey: state.currentKey || "C",
+        meter: "4/4",
+        chords: chords,
+        degrees: chords.map(() => ""),
+        feel: ["custom"],
+        difficulty: "Medium"
+      };
+      
+      const userPatterns = loadUserPatterns();
+      userPatterns.push(newPattern);
+      saveUserPatterns(userPatterns);
+      
+      loadPatterns().then(() => {
+        state.currentPattern = newPattern;
+        if (dom.currentPatternTitle) {
+          dom.currentPatternTitle.textContent = newPattern.title;
+        }
+        alert(`"${newPattern.title}" 패턴이 라이브러리에 저장되었습니다!`);
+        renderLibraryDrawer();
+      });
+    });
+  }
 }
 
 export async function loadPatterns() {
   try {
     const response = await fetch('./static/books/guitar-chord-recipes.json');
+    let staticBook = { bookId: "guitar-chord-recipes", bookTitle: "대중적인 기타 코드 진행 레시피", patterns: [] };
     if (response.ok) {
-      const book = await response.json();
-      state.books = [book];
-      if (callbacks.renderKeyChips) callbacks.renderKeyChips();
+      staticBook = await response.json();
     }
+    
+    const userPatterns = loadUserPatterns();
+    if (userPatterns.length > 0) {
+      const userBook = {
+        bookId: "user-patterns",
+        bookTitle: "내가 만든 패턴",
+        patterns: userPatterns
+      };
+      state.books = [staticBook, userBook];
+    } else {
+      state.books = [staticBook];
+    }
+    
+    if (callbacks.renderKeyChips) callbacks.renderKeyChips();
   } catch (e) {
     console.error("Failed to load static books:", e);
   }

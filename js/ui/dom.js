@@ -48,6 +48,7 @@ export const dom = {
   practiceFocusView: null,
   openLibraryBtn: null,
   currentPatternTitle: null,
+  savePatternBtn: null,
   libraryDrawer: null,
   drawerBackdrop: null,
   closeDrawerBtn: null,
@@ -86,6 +87,7 @@ export function cacheDOMElements() {
   dom.practiceFocusView = document.getElementById("practice-focus-view");
   dom.openLibraryBtn = document.getElementById("open-library-btn");
   dom.currentPatternTitle = document.getElementById("current-pattern-title");
+  dom.savePatternBtn = document.getElementById("save-pattern-btn");
   
   dom.libraryDrawer = document.getElementById("library-drawer");
   dom.drawerBackdrop = document.getElementById("drawer-backdrop");
