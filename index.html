@@ -134,11 +134,21 @@
         </div>
       </div>
 
-      <!-- Main Chord Card -->
-      <div class="focus-chord-card" id="focus-chord-card">
-        <div class="next-chord-badge" id="focus-next-badge">Next: —</div>
-        <div class="focus-chord-name" id="focus-chord-name">—</div>
-        <div class="focus-diagram-container" id="focus-diagram-container"></div>
+      <!-- Split Cards Container (Current & Next preview side-by-side) -->
+      <div class="focus-cards-container">
+        <!-- Current Active Chord Card -->
+        <div class="focus-chord-card current-card" id="focus-chord-card">
+          <div class="card-status-label">CURRENT</div>
+          <div class="focus-chord-name" id="focus-chord-name">—</div>
+          <div class="focus-diagram-container" id="focus-diagram-container"></div>
+        </div>
+
+        <!-- Next Preview Chord Card -->
+        <div class="focus-chord-card next-card" id="focus-next-chord-card">
+          <div class="card-status-label">NEXT</div>
+          <div class="focus-chord-name" id="focus-next-chord-name">—</div>
+          <div class="focus-diagram-container" id="focus-next-diagram-container"></div>
+        </div>
       </div>
 
       <!-- Progression Preview Timeline -->

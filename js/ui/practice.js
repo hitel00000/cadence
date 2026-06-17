@@ -40,17 +40,17 @@ function findLastPlayedChordFromEditor(sectionIndex, barIndex, slotIndex) {
   return null;
 }
 
-function getNextChordName(activeIdx) {
-  if (!state.song || !state.song.sections) return "—";
+function getNextChordSlot(activeIdx) {
+  if (!state.song || !state.song.sections) return null;
   const totalSlots = state.song.sections.length * 8;
   for (let i = 1; i < totalSlots; i++) {
     const nextIdx = (activeIdx + i) % totalSlots;
     const s = getSlotByAbsoluteIndex(nextIdx);
     if (s && !s.isContinue && s.root) {
-      return getDisplayString(s);
+      return { slot: s, index: nextIdx };
     }
   }
-  return "—";
+  return null;
 }
 
 /**
@@ -190,29 +190,42 @@ export function renderFocusView() {
     );
   }
   
+  // 1. Render Current Active Chord Card
   const activeChordName = resolvedSlot ? getDisplayString(resolvedSlot) : "—";
-  const nextChord = getNextChordName(activeSlotIdx);
-  
   const nameEl = document.getElementById("focus-chord-name");
-  const badgeEl = document.getElementById("focus-next-badge");
   const diagramBox = document.getElementById("focus-diagram-container");
   
   if (nameEl) nameEl.textContent = activeChordName;
-  
-  if (badgeEl) {
-    badgeEl.textContent = `Next: ${nextChord}`;
-    if (nextChord !== "—") {
-      badgeEl.classList.add("has-next");
-    } else {
-      badgeEl.classList.remove("has-next");
-    }
-  }
-  
   if (diagramBox) {
     diagramBox.innerHTML = "";
     if (resolvedSlot && resolvedSlot.root) {
       drawChordDiagram(resolvedSlot, diagramBox);
     }
+  }
+  
+  // 2. Render Next Preview Chord Card
+  const nextInfo = getNextChordSlot(activeSlotIdx);
+  const nextNameEl = document.getElementById("focus-next-chord-name");
+  const nextDiagramBox = document.getElementById("focus-next-diagram-container");
+  const nextCard = document.getElementById("focus-next-chord-card");
+  
+  if (nextInfo) {
+    if (nextCard) {
+      nextCard.style.opacity = "1";
+      nextCard.style.pointerEvents = "auto";
+    }
+    if (nextNameEl) nextNameEl.textContent = getDisplayString(nextInfo.slot);
+    if (nextDiagramBox) {
+      nextDiagramBox.innerHTML = "";
+      drawChordDiagram(nextInfo.slot, nextDiagramBox);
+    }
+  } else {
+    if (nextCard) {
+      nextCard.style.opacity = "0.2";
+      nextCard.style.pointerEvents = "none";
+    }
+    if (nextNameEl) nextNameEl.textContent = "—";
+    if (nextDiagramBox) nextDiagramBox.innerHTML = "";
   }
   
   // Highlight active slot & loop range in the timeline
