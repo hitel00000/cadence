@@ -32,11 +32,18 @@
       <h1>Cadence</h1>
       <span class="badge">4/4</span>
     </div>
+    
+    <!-- Mode Toggle Switch (Practice vs Edit) -->
+    <div class="mode-toggle" id="mode-toggle">
+      <button class="mode-btn active" id="mode-practice" data-mode="practice">연습 모드</button>
+      <button class="mode-btn" id="mode-edit" data-mode="edit">편집 모드</button>
+    </div>
+
     <div class="status-container">
       <span data-testid="section-count">1 section</span>
       <span class="w-1.5 h-1.5 rounded-full bg-primary/60 flex items-center gap-1.5">
         <span class="pulse-dot"></span>
-        <span>Auto-saved</span>
+        <span id="save-status-text">Auto-saved</span>
       </span>
     </div>
   </header>
@@ -45,10 +52,8 @@
   <div class="library-bar" id="library-bar">
     <div class="library-container">
       <div class="selector-group">
-        <label for="pattern-select">패턴:</label>
-        <select id="pattern-select" class="pattern-select">
-          <option value="">-- 기본 연습곡 --</option>
-        </select>
+        <button class="open-library-btn" id="open-library-btn">📖 패턴 라이브러리</button>
+        <span class="current-pattern-title" id="current-pattern-title">자유 연주곡</span>
       </div>
       <div class="key-selector-group">
         <span class="key-label">키(Key):</span>
@@ -96,9 +101,17 @@
     </div>
   </div>
 
-  <!-- Scrollable Chord Progression Editor -->
-  <main class="progression-editor" data-testid="progression-editor">
-    <!-- Rendered dynamically by JS -->
+  <!-- Main View Container -->
+  <main class="main-content">
+    <!-- Scrollable Chord Progression Editor (Grid Mode) -->
+    <div class="progression-editor" id="progression-editor" data-testid="progression-editor" style="display: none;">
+      <!-- Rendered dynamically by JS -->
+    </div>
+    
+    <!-- Focus Practice View (Practice Mode) -->
+    <div class="practice-focus-view" id="practice-focus-view">
+      <!-- Rendered dynamically by JS -->
+    </div>
   </main>
 
   <!-- Modal Overlay Backdrop -->
@@ -179,6 +192,28 @@
       <button class="modal-action-btn done" id="confirm-chord-btn" data-testid="confirm-chord">Done</button>
     </div>
     
+  </div>
+
+  <!-- Pattern Library Drawer -->
+  <div class="library-drawer" id="library-drawer">
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    <div class="drawer-sheet">
+      <div class="drawer-header">
+        <h3>📖 패턴 라이브러리</h3>
+        <button class="close-drawer-btn" id="close-drawer-btn">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="search-box">
+          <input type="text" id="library-search" placeholder="패턴 검색 (예: 메이저, 멜로디)..." class="drawer-search-input">
+        </div>
+        <div class="filter-row" id="category-chips">
+          <!-- Categories rendered dynamically -->
+        </div>
+        <div class="pattern-list" id="library-pattern-list">
+          <!-- Patterns list rendered dynamically -->
+        </div>
+      </div>
+    </div>
   </div>
 
 </body>

@@ -73,7 +73,10 @@ let state = {
   editing: null, // { sectionIndex, barIndex, slotIndex }
   books: [],
   currentPattern: null,
-  currentKey: "C"
+  currentKey: "C",
+  uiMode: "practice", // "practice" or "edit"
+  searchQuery: "",
+  selectedCategory: "all"
 };
 
 let showBassNoteAccordion = false;
@@ -86,7 +89,6 @@ const dom = {
   bpmDown: null,
   bpmUp: null,
   strokeSelector: null,
-  patternSelect: null,
   keyChips: null,
   loopToggle: null,
   seekFirst: null,
@@ -114,7 +116,21 @@ const dom = {
   bassNoteList: null,
   diagramBox: null,
   clearChordBtn: null,
-  confirmChordBtn: null
+  confirmChordBtn: null,
+  
+  // New Focus Mode & Library Drawer elements
+  modeToggle: null,
+  modePractice: null,
+  modeEdit: null,
+  practiceFocusView: null,
+  openLibraryBtn: null,
+  currentPatternTitle: null,
+  libraryDrawer: null,
+  drawerBackdrop: null,
+  closeDrawerBtn: null,
+  librarySearch: null,
+  categoryChips: null,
+  libraryPatternList: null
 };
 
 // Initialize Application
@@ -131,10 +147,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Cache DOM references
 function cacheDOMElements() {
-  dom.patternSelect = document.getElementById("pattern-select");
   dom.keyChips = document.getElementById("key-chips");
-  
   dom.sectionCount = document.querySelector("[data-testid='section-count']");
+  dom.autoSavedText = document.getElementById("save-status-text");
+  
+  dom.bpmInput = document.querySelector("[data-testid='bpm-input']");
+  dom.bpmDown = document.querySelector("[data-testid='bpm-down']");
+  dom.bpmUp = document.querySelector("[data-testid='bpm-up']");
+  dom.strokeSelector = document.querySelector("[data-testid='stroke-selector']");
+  dom.loopToggle = document.querySelector("[data-testid='loop-toggle']");
+  
+  dom.seekFirst = document.querySelector("[data-testid='seek-first']");
+  dom.seekPrev = document.querySelector("[data-testid='seek-prev']");
+  dom.playPause = document.querySelector("[data-testid='play-pause']");
+  dom.stop = document.querySelector("[data-testid='stop']");
+  dom.seekNext = document.querySelector("[data-testid='seek-next']");
+  dom.seekLast = document.querySelector("[data-testid='seek-last']");
+  dom.positionDisplay = document.querySelector("[data-testid='position-display']");
+  
+  dom.progressionEditor = document.querySelector("[data-testid='progression-editor']");
+  
+  // New Focus & Drawer caching
+  dom.modeToggle = document.getElementById("mode-toggle");
+  dom.modePractice = document.getElementById("mode-practice");
+  dom.modeEdit = document.getElementById("mode-edit");
+  dom.practiceFocusView = document.getElementById("practice-focus-view");
+  dom.openLibraryBtn = document.getElementById("open-library-btn");
+  dom.currentPatternTitle = document.getElementById("current-pattern-title");
+  
+  dom.libraryDrawer = document.getElementById("library-drawer");
+  dom.drawerBackdrop = document.getElementById("drawer-backdrop");
+  dom.closeDrawerBtn = document.getElementById("close-drawer-btn");
+  dom.librarySearch = document.getElementById("library-search");
+  dom.categoryChips = document.getElementById("category-chips");
+  dom.libraryPatternList = document.getElementById("library-pattern-list");
   dom.autoSavedText = document.querySelector(".status-container span:last-child");
   
   dom.bpmInput = document.querySelector("[data-testid='bpm-input']");
@@ -267,6 +313,16 @@ function updatePositionDisplay() {
 }
 
 function renderEditor() {
+  if (state.uiMode === "practice") {
+    if (dom.practiceFocusView) dom.practiceFocusView.style.display = "flex";
+    if (dom.progressionEditor) dom.progressionEditor.style.display = "none";
+    renderFocusView();
+    return;
+  }
+  
+  if (dom.practiceFocusView) dom.practiceFocusView.style.display = "none";
+  if (dom.progressionEditor) dom.progressionEditor.style.display = "block";
+
   dom.progressionEditor.innerHTML = "";
   
   state.song.sections.forEach((section, sIdx) => {
@@ -404,6 +460,13 @@ function renderEditor() {
 // ─── Playhead Sequential Highlighter ───
 // Updates playhead DOM classes directly to bypass heavy re-renders
 function updatePlayheadDOM(activeSlotIdx) {
+  state.playback.currentSlot = activeSlotIdx;
+  updatePositionDisplay();
+
+  if (state.uiMode === "practice") {
+    renderFocusView();
+  }
+
   // Remove playheads and active beat dots from all buttons
   document.querySelectorAll(".chord-slot").forEach(slotBtn => {
     const playhead = slotBtn.querySelector(".playhead-highlight");
@@ -553,8 +616,8 @@ function renderButtonGrid(container, list, activeValue, type, onSelect, isDisabl
 }
 
 // Draw fretboard diagram helper inside modal dialog
-function drawChordDiagram(chord) {
-  const container = dom.diagramBox;
+function drawChordDiagram(chord, customContainer) {
+  const container = customContainer || dom.diagramBox;
   container.innerHTML = "";
   
   if (!chord || !chord.root || chord.isContinue) {
@@ -669,8 +732,8 @@ function drawChordDiagram(chord) {
 function selectSlot(sIdx, bIdx, slIdx) {
   if (state.currentPattern) {
     state.currentPattern = null;
-    if (dom.patternSelect) {
-      dom.patternSelect.value = "";
+    if (dom.currentPatternTitle) {
+      dom.currentPatternTitle.textContent = "자유 연주곡";
     }
     renderKeyChips();
     saveSong(); // Saves transposed pattern as local custom song
@@ -752,7 +815,7 @@ function clearEditingChord() {
 function addSection() {
   if (state.currentPattern) {
     state.currentPattern = null;
-    if (dom.patternSelect) dom.patternSelect.value = "";
+    if (dom.currentPatternTitle) dom.currentPatternTitle.textContent = "자유 연주곡";
     renderKeyChips();
   }
 
@@ -778,7 +841,7 @@ function removeSection(sIdx) {
   
   if (state.currentPattern) {
     state.currentPattern = null;
-    if (dom.patternSelect) dom.patternSelect.value = "";
+    if (dom.currentPatternTitle) dom.currentPatternTitle.textContent = "자유 연주곡";
     renderKeyChips();
   }
 
@@ -1040,13 +1103,46 @@ function bindEvents() {
     }
   });
 
-  // Pattern library selection event
-  if (dom.patternSelect) {
-    dom.patternSelect.addEventListener("change", handlePatternSelectChange);
+  // Mode Toggle
+  if (dom.modeToggle && dom.modePractice && dom.modeEdit) {
+    dom.modePractice.addEventListener("click", () => {
+      if (state.uiMode === "practice") return;
+      state.uiMode = "practice";
+      dom.modePractice.classList.add("active");
+      dom.modeEdit.classList.remove("active");
+      renderEditor();
+    });
+    
+    dom.modeEdit.addEventListener("click", () => {
+      if (state.uiMode === "edit") return;
+      state.uiMode = "edit";
+      dom.modeEdit.classList.add("active");
+      dom.modePractice.classList.remove("active");
+      renderEditor();
+    });
+  }
+
+  // Open/Close Library Drawer
+  if (dom.openLibraryBtn) {
+    dom.openLibraryBtn.addEventListener("click", openLibraryDrawer);
+  }
+  if (dom.closeDrawerBtn) {
+    dom.closeDrawerBtn.addEventListener("click", closeDrawerBtn => closeLibraryDrawer());
+  }
+  if (dom.drawerBackdrop) {
+    dom.drawerBackdrop.addEventListener("click", () => closeLibraryDrawer());
+  }
+  
+  // Search in library drawer
+  if (dom.librarySearch) {
+    dom.librarySearch.addEventListener("input", (e) => {
+      state.searchQuery = e.target.value;
+      renderPatternList();
+    });
   }
 }
 
-// ─── Pattern Library & Transposition Helpers ───
+// ─── Pattern Library & Focus View Helpers ───
 
 async function loadPatterns() {
   try {
@@ -1054,39 +1150,233 @@ async function loadPatterns() {
     if (response.ok) {
       const book = await response.json();
       state.books = [book];
-      populatePatternSelect();
-      renderKeyChips(); // Ensure chips render with correct initial disabled state
+      renderKeyChips(); // Initial disabled state sync
     }
   } catch (e) {
     console.error("Failed to load static books:", e);
   }
 }
 
-function populatePatternSelect() {
-  if (!dom.patternSelect) return;
+function openLibraryDrawer() {
+  if (dom.libraryDrawer) {
+    dom.libraryDrawer.classList.add("open");
+    renderLibraryDrawer();
+  }
+}
+
+function closeLibraryDrawer() {
+  if (dom.libraryDrawer) {
+    dom.libraryDrawer.classList.remove("open");
+  }
+}
+
+function renderLibraryDrawer() {
+  if (!dom.categoryChips) return;
   
-  dom.patternSelect.innerHTML = '<option value="">-- 내 자유 연주곡 --</option>';
-  
+  const categories = ["all"];
   state.books.forEach(book => {
-    const optGroup = document.createElement("optgroup");
-    optGroup.label = book.bookTitle;
+    book.patterns.forEach(p => {
+      if (p.category && !categories.includes(p.category)) {
+        categories.push(p.category);
+      }
+    });
+  });
+  
+  dom.categoryChips.innerHTML = "";
+  categories.forEach(cat => {
+    const chip = document.createElement("button");
+    chip.className = `filter-chip${state.selectedCategory === cat ? " active" : ""}`;
+    chip.textContent = cat === "all" ? "전체" : cat;
     
-    book.patterns.forEach(pattern => {
-      const opt = document.createElement("option");
-      opt.value = `${book.bookId}:${pattern.id}`;
-      opt.textContent = pattern.title;
-      optGroup.appendChild(opt);
+    chip.addEventListener("click", () => {
+      state.selectedCategory = cat;
+      renderLibraryDrawer();
     });
     
-    dom.patternSelect.appendChild(optGroup);
+    dom.categoryChips.appendChild(chip);
   });
+  
+  renderPatternList();
+}
+
+function renderPatternList() {
+  if (!dom.libraryPatternList) return;
+  
+  dom.libraryPatternList.innerHTML = "";
+  let count = 0;
+  
+  // Custom Song Option
+  if (state.selectedCategory === "all" && !state.searchQuery) {
+    const customCard = document.createElement("div");
+    customCard.className = "pattern-card";
+    customCard.style.borderStyle = "dashed";
+    customCard.style.borderColor = "var(--primary-border)";
+    customCard.innerHTML = `
+      <div class="pattern-card-header">
+        <span class="pattern-card-title" style="color: var(--primary);">✏️ 내 자유 연주곡 (자유 입력)</span>
+        <div class="pattern-card-meta">
+          <span class="meta-badge" style="background-color: var(--primary-glow); color: var(--primary);">로컬 저장</span>
+        </div>
+      </div>
+      <div class="pattern-card-chords">직접 코드를 마디별로 입력하고 편집하여 나만의 진행을 만듭니다.</div>
+    `;
+    customCard.addEventListener("click", () => {
+      state.currentPattern = null;
+      state.currentKey = "C";
+      
+      if (dom.currentPatternTitle) {
+        dom.currentPatternTitle.textContent = "자유 연주곡";
+      }
+      
+      closeLibraryDrawer();
+      loadSong();
+      
+      if (dom.bpmInput && state.song) {
+        dom.bpmInput.value = state.song.bpm;
+      }
+      
+      if (state.playback.isPlaying) {
+        stopSequencer();
+        startPlayback();
+      }
+      
+      renderToolbar();
+      renderEditor();
+      renderKeyChips();
+    });
+    dom.libraryPatternList.appendChild(customCard);
+  }
+  
+  state.books.forEach(book => {
+    book.patterns.forEach(pattern => {
+      if (state.selectedCategory !== "all" && pattern.category !== state.selectedCategory) {
+        return;
+      }
+      
+      if (state.searchQuery) {
+        const query = state.searchQuery.toLowerCase();
+        const matchesTitle = pattern.title.toLowerCase().includes(query);
+        const matchesCategory = pattern.category && pattern.category.toLowerCase().includes(query);
+        const matchesChords = pattern.chords.some(c => c.toLowerCase().includes(query));
+        if (!matchesTitle && !matchesCategory && !matchesChords) {
+          return;
+        }
+      }
+      
+      count++;
+      const card = document.createElement("div");
+      card.className = "pattern-card";
+      
+      const difficultyClass = `difficulty-${(pattern.difficulty || "Easy").toLowerCase()}`;
+      
+      card.innerHTML = `
+        <div class="pattern-card-header">
+          <span class="pattern-card-title">${pattern.title}</span>
+          <div class="pattern-card-meta">
+            <span class="meta-badge">${pattern.category || "기타"}</span>
+            <span class="meta-badge ${difficultyClass}">${pattern.difficulty || "Easy"}</span>
+          </div>
+        </div>
+        <div class="pattern-card-chords">${pattern.chords.join(" → ")}</div>
+      `;
+      
+      card.addEventListener("click", () => {
+        state.currentPattern = pattern;
+        state.currentKey = pattern.defaultKey || "C";
+        
+        if (dom.currentPatternTitle) {
+          dom.currentPatternTitle.textContent = pattern.title;
+        }
+        
+        closeLibraryDrawer();
+        applyPatternChange();
+        renderKeyChips();
+      });
+      
+      dom.libraryPatternList.appendChild(card);
+    });
+  });
+  
+  if (count === 0 && (state.selectedCategory !== "all" || state.searchQuery)) {
+    dom.libraryPatternList.innerHTML = `<div class="text-center text-muted-foreground text-sm py-4">일치하는 패턴이 없습니다.</div>`;
+  }
+}
+
+function getNextChordName(activeIdx) {
+  const totalSlots = state.song.sections.length * 8;
+  for (let i = 1; i < totalSlots; i++) {
+    const nextIdx = (activeIdx + i) % totalSlots;
+    const s = getSlotByAbsoluteIndex(nextIdx);
+    if (s && !s.isContinue && s.root) {
+      return getDisplayString(s);
+    }
+  }
+  return "—";
+}
+
+function renderFocusView() {
+  const container = dom.practiceFocusView;
+  if (!container) return;
+  
+  if (!state.song || !state.song.sections || state.song.sections.length === 0) {
+    container.innerHTML = `<div class="text-muted-foreground text-sm">연습할 곡이 로드되지 않았습니다.</div>`;
+    return;
+  }
+  
+  const activeSlotIdx = state.playback.currentSlot;
+  let activeSlot = getSlotByAbsoluteIndex(activeSlotIdx);
+  let resolvedSlot = activeSlot;
+  if (activeSlot && activeSlot.isContinue) {
+    resolvedSlot = findLastPlayedChordFromEditor(
+      Math.floor(activeSlotIdx / 8),
+      Math.floor((activeSlotIdx % 8) / 2),
+      activeSlotIdx % 2
+    );
+  }
+  
+  const activeChordName = resolvedSlot ? getDisplayString(resolvedSlot) : "—";
+  const nextChord = getNextChordName(activeSlotIdx);
+  
+  container.innerHTML = `
+    <div class="focus-chord-card">
+      <div class="next-chord-badge${nextChord !== "—" ? " has-next" : ""}" id="focus-next-badge">Next: ${nextChord}</div>
+      <div class="focus-chord-name" id="focus-chord-name">${activeChordName}</div>
+      <div class="focus-diagram-container" id="focus-diagram-container"></div>
+    </div>
+    <div class="focus-progression-preview" id="focus-progression-preview"></div>
+  `;
+  
+  const diagramBox = document.getElementById("focus-diagram-container");
+  if (diagramBox && resolvedSlot) {
+    drawChordDiagram(resolvedSlot, diagramBox);
+  }
+  
+  const previewContainer = document.getElementById("focus-progression-preview");
+  if (previewContainer) {
+    const totalSlots = state.song.sections.length * 8;
+    for (let idx = 0; idx < totalSlots; idx++) {
+      const slot = getSlotByAbsoluteIndex(idx);
+      if (!slot) continue;
+      
+      const slotChip = document.createElement("button");
+      slotChip.className = `focus-preview-slot${idx === activeSlotIdx ? " active" : ""}`;
+      slotChip.textContent = getDisplayString(slot);
+      
+      slotChip.addEventListener("click", () => {
+        state.playback.currentSlot = idx;
+        seekSequencer(idx);
+        updatePlayheadDOM(idx);
+      });
+      
+      previewContainer.appendChild(slotChip);
+    }
+  }
 }
 
 function renderKeyChips() {
   if (!dom.keyChips) return;
   
   const keys = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
-  
   dom.keyChips.innerHTML = "";
   
   keys.forEach(key => {
@@ -1094,7 +1384,6 @@ function renderKeyChips() {
     chip.className = `key-chip${state.currentKey === key ? " active" : ""}`;
     chip.textContent = key;
     
-    // Disable key chips if no pattern is selected
     if (!state.currentPattern) {
       chip.disabled = true;
       chip.style.opacity = "0.5";
@@ -1119,12 +1408,10 @@ function applyPatternChange() {
   if (newSong) {
     state.song = newSong;
     
-    // Update BPM input display
     if (dom.bpmInput) {
       dom.bpmInput.value = state.song.bpm;
     }
     
-    // If playing, restart sequencer to apply transposition immediately
     if (state.playback.isPlaying) {
       stopSequencer();
       startPlayback();
@@ -1133,40 +1420,4 @@ function applyPatternChange() {
     renderToolbar();
     renderEditor();
   }
-}
-
-function handlePatternSelectChange(e) {
-  const value = e.target.value;
-  if (!value) {
-    state.currentPattern = null;
-    state.currentKey = "C";
-    loadSong(); // Reload custom song
-    
-    // Update BPM input
-    if (dom.bpmInput && state.song) {
-      dom.bpmInput.value = state.song.bpm;
-    }
-    
-    // If playing, restart sequencer
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
-    
-    renderToolbar();
-    renderEditor();
-  } else {
-    const [bookId, patternId] = value.split(":");
-    const book = state.books.find(b => b.bookId === bookId);
-    if (book) {
-      const pattern = book.patterns.find(p => p.id === patternId);
-      if (pattern) {
-        state.currentPattern = pattern;
-        state.currentKey = pattern.defaultKey || "C";
-        applyPatternChange();
-      }
-    }
-  }
-  
-  renderKeyChips();
 }
