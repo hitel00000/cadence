@@ -61,10 +61,10 @@
   - [x] `js/ui/toolbar.js` 파일 생성 및 `renderToolbar`, `updatePositionDisplay` 이관
   - [x] BPM Input, Up/Down 버튼, 스트로크 셀렉터, 루프 토글 클릭 핸들러 바인딩 이관
   - [x] 악기 선택기(Guitar vs Piano) 클릭 스위치 동작 연동
-- [ ] **R-007**: 연습 포커스 뷰 추출 (`js/ui/practice.js`)
-  - [ ] `js/ui/practice.js` 파일 생성 및 `renderFocusView`, `updateFocusViewActiveSlot`, `rebuildFocusTimeline`, `initLoopABOptions` 이관
-  - [ ] A-B Loop 시작/종료 마디 변경 핸들러 및 스토어 범위 지정 연동
-  - [ ] Wake Lock API 화면 꺼짐 방지 제어 로직(`requestWakeLock`/`releaseWakeLock`/`checkWakeLockSupport`) 이관
+- [x] **R-007**: 연습 포커스 뷰 추출 (`js/ui/practice.js`)
+  - [x] `js/ui/practice.js` 파일 생성 및 `renderFocusView`, `updateFocusViewActiveSlot`, `rebuildFocusTimeline`, `initLoopABOptions` 이관
+  - [x] A-B Loop 시작/종료 마디 변경 핸들러 및 스토어 범위 지정 연동
+  - [x] Wake Lock API 화면 꺼짐 방지 제어 로직(`requestWakeLock`/`releaseWakeLock`/`checkWakeLockSupport`) 이관
 - [ ] **R-008**: 그리드 코드 진행 편집기 추출 (`js/ui/editor.js`)
   - [ ] `js/ui/editor.js` 파일 생성 및 `renderEditor`, `addSection`, `removeSection` 이관
   - [ ] 마디 슬롯 클릭 시 코드 선택 모달 호출하는 중재 이벤트 가교 구현
