@@ -135,7 +135,18 @@ export function patternToSong(pattern, targetKey) {
 
   // 4. Construct default properties
   const defaultBpm = pattern.bpm || 90;
-  const defaultStroke = (pattern.feel && pattern.feel.length > 0) ? pattern.feel[0] : "arpeggio";
+  let defaultStroke = "arpeggio";
+  if (pattern.stroke && ["strong", "soft", "arpeggio"].includes(pattern.stroke)) {
+    defaultStroke = pattern.stroke;
+  } else if (pattern.feel) {
+    if (pattern.feel.includes("strong") || pattern.feel.includes("rock")) {
+      defaultStroke = "strong";
+    } else if (pattern.feel.includes("soft") || pattern.feel.includes("ballad") || pattern.feel.includes("sad")) {
+      defaultStroke = "soft";
+    } else if (pattern.feel.includes("arpeggio") || pattern.feel.includes("bright") || pattern.feel.includes("pop")) {
+      defaultStroke = "arpeggio";
+    }
+  }
 
   return {
     bpm: defaultBpm,
