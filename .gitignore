@@ -4,5 +4,5 @@ static/books/guitar-chord-recipes.local.json
 # Temporary / OS generated files
 .DS_Store
 Thumbs.db
-새 폴더/
+tmp/
 *.log
