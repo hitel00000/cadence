@@ -113,7 +113,30 @@ export function patternToSong(pattern, targetKey) {
     };
   });
 
-  // 3. Construct default properties
+  // 3. Chunk bars into sections of exactly 4 bars (to align with the 1 Section = 4 Bars constraint)
+  const sections = [];
+  const chunkSize = 4;
+  
+  if (bars.length === 0) {
+    sections.push({
+      bars: Array.from({ length: chunkSize }, () => ({
+        slots: [createEmptySlot(), createEmptySlot()]
+      }))
+    });
+  } else {
+    for (let i = 0; i < bars.length; i += chunkSize) {
+      const chunk = bars.slice(i, i + chunkSize);
+      // Pad the last section to 4 bars if it's incomplete
+      while (chunk.length < chunkSize) {
+        chunk.push({
+          slots: [createEmptySlot(), createEmptySlot()]
+        });
+      }
+      sections.push({ bars: chunk });
+    }
+  }
+
+  // 4. Construct default properties
   const defaultBpm = pattern.bpm || 90;
   const defaultStroke = (pattern.feel && pattern.feel.length > 0) ? pattern.feel[0] : "arpeggio";
 
@@ -121,12 +144,6 @@ export function patternToSong(pattern, targetKey) {
     bpm: defaultBpm,
     stroke: defaultStroke,
     loop: true,
-    sections: [
-      {
-        bars: bars.length > 0 ? bars : Array.from({ length: 4 }, () => ({
-          slots: [createEmptySlot(), createEmptySlot()]
-        }))
-      }
-    ]
+    sections: sections
   };
 }
