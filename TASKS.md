@@ -51,10 +51,10 @@
   - [x] `js/ui/library.js` 파일 생성 및 드로어 전용 UI 빌더 이관
   - [x] `renderLibraryDrawer`, `renderPatternList`, `openLibraryDrawer`, `closeLibraryDrawer` 이관
   - [x] 카테고리 필터링 칩 렌더링 및 드로어 내 텍스트 검색창 실시간 이벤트 바인딩 격리
-- [ ] **R-005**: 코드 선택 모달 추출 (`js/ui/picker.js`)
-  - [ ] `js/ui/picker.js` 파일 생성 및 `openPicker`, `closePicker`, `renderPicker` 이관
-  - [ ] Root/Quality/Tension/Extension 동적 격자 렌더링 및 Bass Note 아코디언 핸들러 이관
-  - [ ] 모달 확인(Confirm) 및 초기화(Clear) 클릭 핸들러 동작 및 상태 동기화 격리
+- [x] **R-005**: 코드 선택 모달 추출 (`js/ui/picker.js`)
+  - [x] `js/ui/picker.js` 파일 생성 및 `openPicker`, `closePicker`, `renderPicker` 이관
+  - [x] Root/Quality/Tension/Extension 동적 격자 렌더링 및 Bass Note 아코디언 핸들러 이관
+  - [x] 모달 확인(Confirm) 및 초기화(Clear) 클릭 핸들러 동작 및 상태 동기화 격리
 
 ### 🟪 3단계: 코어 뷰 컴포넌트 분리
 - [ ] **R-006**: 재생 제어 툴바 추출 (`js/ui/toolbar.js`)

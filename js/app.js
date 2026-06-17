@@ -26,38 +26,10 @@ import { ICONS } from './ui/icons.js';
 import { dom, cacheDOMElements } from './ui/dom.js';
 import { store, state } from './core/state.js';
 import { initLibraryDrawer, loadPatterns } from './ui/library.js';
+import { initChordPicker, openPicker, closePicker, renderPicker, isPickerOpen } from './ui/picker.js';
 
-
-
-// Constant display tables
-const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const QUALITIES = [
-  { value: "major", label: "Major" },
-  { value: "minor", label: "Minor" },
-  { value: "dim", label: "dim" },
-  { value: "aug", label: "aug" }
-];
-const TENSIONS = [
-  { value: "", label: "—" },
-  { value: "sus2", label: "sus2" },
-  { value: "sus4", label: "sus4" },
-  { value: "7", label: "7" },
-  { value: "maj7", label: "maj7" }
-];
-const EXTENSIONS = [
-  { value: "", label: "—" },
-  { value: "9", label: "9" },
-  { value: "add9", label: "add9" },
-  { value: "11", label: "11" },
-  { value: "add11", label: "add11" },
-  { value: "13", label: "13" }
-];
 const STROKE_TEXT = { strong: "Strong", soft: "Soft", arpeggio: "Arpeggio" };
 const STROKE_SYMBOL = { strong: "↓↓", soft: "↕↕", arpeggio: "~" };
-
-
-
-let showBassNoteAccordion = false;
 
 
 
@@ -339,125 +311,7 @@ function updatePlayheadDOM(activeSlotIdx) {
   }
 }
 
-// ─── Chord Picker Modal Logic ───
 
-function openPicker() {
-  dom.modalOverlay.classList.add("open");
-  dom.modalSheet.classList.add("open");
-  renderPicker();
-}
-
-function closePicker() {
-  dom.modalOverlay.classList.remove("open");
-  dom.modalSheet.classList.remove("open");
-  state.editing = null;
-  // Re-render editor to clear editing border rings
-  renderEditor();
-}
-
-function renderPicker() {
-  if (!state.editing) return;
-  const slot = getEditingSlot();
-  
-  // Update Header text
-  const chordName = getDisplayString(slot);
-  dom.modalChordName.textContent = chordName;
-  
-  if (slot.isContinue) {
-    dom.modalChordSub.textContent = "이전 코드를 한 번 더 연주합니다 (반복).";
-    dom.continueToggleBtn.classList.add("active");
-  } else {
-    dom.modalChordSub.textContent = slot.root ? "기타 지판을 누르는 방법을 확인하세요." : "지판을 선택하여 화음을 구성해 보세요.";
-    dom.continueToggleBtn.classList.remove("active");
-  }
-  
-  // Show / Hide Clear button
-  if (slot.isContinue) {
-    dom.clearChordBtn.style.display = "none";
-  } else {
-    dom.clearChordBtn.style.display = "block";
-  }
-  
-  // Render subgrids
-  renderButtonGrid(dom.pickerRoots, ROOTS, slot.root, "root", (val) => {
-    updateEditingSlot({ root: val, isContinue: false });
-  }, slot.isContinue);
-  
-  renderButtonGrid(dom.pickerQualities, QUALITIES, slot.quality, "quality", (val) => {
-    updateEditingSlot({ quality: val });
-  }, slot.isContinue || !slot.root);
-  
-  renderButtonGrid(dom.pickerTensions, TENSIONS, slot.tension, "tension", (val) => {
-    updateEditingSlot({ tension: val });
-  }, slot.isContinue || !slot.root);
-  
-  renderButtonGrid(dom.pickerExtensions, EXTENSIONS, slot.extension, "extension", (val) => {
-    updateEditingSlot({ extension: val });
-  }, slot.isContinue || !slot.root);
-  
-  // Render Bass Note accordion
-  if (showBassNoteAccordion) {
-    dom.bassAccordionContent.style.display = "block";
-    dom.bassAccordionIcon.textContent = "▲";
-    
-    // Render bass note buttons
-    dom.bassNoteList.innerHTML = "";
-    
-    // None option button
-    const noneBtn = document.createElement("button");
-    noneBtn.className = `picker-btn ${!slot.bassNote ? "active" : ""}`;
-    noneBtn.setAttribute("data-testid", "bass-none");
-    noneBtn.textContent = "—";
-    noneBtn.disabled = slot.isContinue || !slot.root;
-    noneBtn.addEventListener("click", () => {
-      updateEditingSlot({ bassNote: null });
-    });
-    dom.bassNoteList.appendChild(noneBtn);
-    
-    // Map roots
-    ROOTS.forEach(root => {
-      const btn = document.createElement("button");
-      btn.className = `picker-btn font-mono ${slot.bassNote === root ? "active" : ""}`;
-      btn.setAttribute("data-testid", `bass-${root}`);
-      btn.textContent = root;
-      btn.disabled = slot.isContinue || !slot.root;
-      btn.addEventListener("click", () => {
-        updateEditingSlot({ bassNote: root });
-      });
-      dom.bassNoteList.appendChild(btn);
-    });
-  } else {
-    dom.bassAccordionContent.style.display = "none";
-    dom.bassAccordionIcon.textContent = "▼";
-  }
-  
-  // Draw Fretboard SVG
-  drawChordDiagram(slot);
-}
-
-function renderButtonGrid(container, list, activeValue, type, onSelect, isDisabled) {
-  container.innerHTML = "";
-  
-  list.forEach(item => {
-    const val = typeof item === "string" ? item : item.value;
-    const label = typeof item === "string" ? item : item.label;
-    
-    const btn = document.createElement("button");
-    
-    let btnClass = "picker-btn";
-    if (type === "root") btnClass += " font-mono";
-    if (type === "tension" || type === "extension") btnClass += " px-pad";
-    if (activeValue === val) btnClass += " active";
-    
-    btn.className = btnClass;
-    btn.setAttribute("data-testid", `${type}-${val || "none"}`);
-    btn.textContent = label;
-    btn.disabled = isDisabled;
-    btn.addEventListener("click", () => onSelect(val));
-    
-    container.appendChild(btn);
-  });
-}
 
 
 
@@ -816,19 +670,14 @@ function bindEvents() {
   dom.seekNext.addEventListener("click", seekNext);
   dom.seekLast.addEventListener("click", seekLast);
   
-  // Modal Picker actions
-  dom.closeModalBtn.addEventListener("click", closePicker);
-  dom.modalOverlay.addEventListener("click", closePicker);
-  
-  dom.previewSoundBtn.addEventListener("click", previewEditingChord);
-  dom.continueToggleBtn.addEventListener("click", toggleContinueSlot);
-  dom.clearChordBtn.addEventListener("click", clearEditingChord);
-  dom.confirmChordBtn.addEventListener("click", closePicker);
-  
-  // Bass accordion toggle
-  dom.bassAccordionHeader.addEventListener("click", () => {
-    showBassNoteAccordion = !showBassNoteAccordion;
-    renderPicker();
+  // Initialize Chord Picker Modal Component
+  initChordPicker({
+    getEditingSlot,
+    updateEditingSlot,
+    previewEditingChord,
+    toggleContinueSlot,
+    clearEditingChord,
+    renderEditor
   });
   
   // Keyboard Shortcuts (Spacebar = Play/Pause, Esc = Stop, Arrows = Seek, Enter = Apply/Done)
@@ -843,13 +692,13 @@ function bindEvents() {
       togglePlayback();
     } else if (e.code === "Escape") {
       e.preventDefault();
-      if (dom.modalOverlay.classList.contains("open")) {
+      if (isPickerOpen()) {
         closePicker();
       } else {
         stopPlayback();
       }
     } else if (e.code === "Enter") {
-      if (dom.modalOverlay.classList.contains("open")) {
+      if (isPickerOpen()) {
         e.preventDefault();
         closePicker();
       }
