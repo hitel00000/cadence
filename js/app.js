@@ -232,7 +232,10 @@ function getSlotByAbsoluteIndex(absIdx) {
 function bindEvents() {
   initToolbar({
     stopSequencer,
-    startPlayback
+    startPlayback,
+    renderFocusView: () => {
+      if (state.uiMode === "practice") renderFocusView();
+    }
   });
   
   if (dom.playPause) dom.playPause.addEventListener("click", togglePlayback);

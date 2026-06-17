@@ -1,12 +1,13 @@
 /* ==========================================================================
-   Cadence - Guitar Fretboard Fingering Diagram SVG Renderer
+   Cadence - Guitar Fretboard & Piano Keyboard SVG Diagram Renderer
    ========================================================================== */
 
-import { resolveChordShape } from '../chordDb.js';
+import { resolveChordShape, resolveChordNotes } from '../chordDb.js';
+import { loadSettings } from '../core/storage.js';
 import { dom } from './dom.js';
 
 /**
- * Draw SVG guitar chord fingering diagram.
+ * Draw SVG chord fingering diagram dynamically based on active instrument.
  * 
  * @param {Object} chord - Chord definition slot
  * @param {HTMLElement} [customContainer] - Optional target container
@@ -21,7 +22,95 @@ export function drawChordDiagram(chord, customContainer) {
     container.innerHTML = `<div class="flex items-center justify-center text-muted-foreground text-xs" style="width: 160px; height: 176px;">No diagram</div>`;
     return;
   }
-  
+
+  // Detect active instrument setting
+  const settings = loadSettings() || { instrument: "guitar" };
+  const instrument = settings.instrument || "guitar";
+
+  if (instrument === "piano") {
+    drawPianoDiagram(chord, container);
+  } else {
+    drawGuitarDiagram(chord, container);
+  }
+}
+
+/**
+ * Renders a visual piano keyboard showing pressed keys for chord voicing
+ */
+function drawPianoDiagram(chord, container) {
+  const notes = resolveChordNotes(chord) || [];
+  const activeNotes = [...new Set(notes.filter(n => n >= 0))];
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("width", "160");
+  svg.setAttribute("height", "176");
+  svg.setAttribute("viewBox", "0 0 160 176");
+  svg.setAttribute("class", "diagram-svg-box");
+
+  const width = 160;
+  const height = 176;
+  const topPad = 26;
+  const leftPad = 8;
+  const rightPad = 8;
+  const bottomPad = 14;
+
+  const gridW = width - leftPad - rightPad;
+  const gridH = height - topPad - bottomPad;
+
+  // Cover notes from C3 (48) to E5 (76) - 17 White Keys
+  const whiteKeys = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72, 74, 76];
+  const blackKeys = [
+    { note: 49, leftOf: 50 }, { note: 51, leftOf: 52 },
+    { note: 54, leftOf: 55 }, { note: 56, leftOf: 57 }, { note: 58, leftOf: 59 },
+    { note: 61, leftOf: 62 }, { note: 63, leftOf: 64 },
+    { note: 66, leftOf: 67 }, { note: 68, leftOf: 69 }, { note: 70, leftOf: 71 },
+    { note: 73, leftOf: 74 }, { note: 75, leftOf: 76 }
+  ];
+
+  const whiteKeyWidth = gridW / whiteKeys.length;
+  const blackKeyWidth = whiteKeyWidth * 0.65;
+  const blackKeyHeight = gridH * 0.58;
+
+  let html = `<rect width="${width}" height="${height}" fill="transparent"></rect>`;
+
+  // 1. Draw White Keys
+  whiteKeys.forEach((note, idx) => {
+    const x = leftPad + idx * whiteKeyWidth;
+    const isPressed = activeNotes.some(an => an === note || (an % 12 === note % 12));
+
+    html += `<rect x="${x}" y="${topPad}" width="${whiteKeyWidth - 0.8}" height="${gridH}" fill="var(--card)" stroke="currentColor" stroke-width="0.8" opacity="0.9" rx="1.5"></rect>`;
+
+    if (isPressed) {
+      html += `<circle cx="${x + whiteKeyWidth / 2 - 0.4}" cy="${topPad + gridH - 12}" r="${whiteKeyWidth * 0.32}" fill="var(--primary)"></circle>`;
+    }
+  });
+
+  // 2. Draw Black Keys
+  blackKeys.forEach((bk) => {
+    const leftOfIdx = whiteKeys.indexOf(bk.leftOf);
+    if (leftOfIdx === -1) return;
+
+    const x = leftPad + leftOfIdx * whiteKeyWidth - blackKeyWidth / 2;
+    const isPressed = activeNotes.some(an => an === bk.note || (an % 12 === bk.note % 12));
+
+    html += `<rect x="${x}" y="${topPad}" width="${blackKeyWidth}" height="${blackKeyHeight}" fill="#09090b" stroke="currentColor" stroke-width="0.5" rx="1"></rect>`;
+
+    if (isPressed) {
+      html += `<circle cx="${x + blackKeyWidth / 2}" cy="${topPad + blackKeyHeight - 6}" r="${blackKeyWidth * 0.35}" fill="var(--primary)"></circle>`;
+    }
+  });
+
+  // 3. Instrument Header
+  html += `<text x="${width / 2}" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-weight="600" opacity="0.7">PIANO KEYBOARD</text>`;
+
+  svg.innerHTML = html;
+  container.appendChild(svg);
+}
+
+/**
+ * Renders original guitar fretboard diagram
+ */
+function drawGuitarDiagram(chord, container) {
   const shape = resolveChordShape(chord);
   if (!shape) {
     container.innerHTML = `<div class="flex items-center justify-center text-muted-foreground text-xs" style="width: 160px; height: 176px;">No diagram</div>`;
@@ -85,11 +174,10 @@ export function drawChordDiagram(chord, customContainer) {
   
   let html = `<rect width="${width}" height="${height}" fill="transparent"></rect>`;
   
-  // Nut line (if baseFret is 1)
+  // Nut line
   if (baseFret <= 1 || displayBaseFret <= 1) {
     html += `<line x1="${leftPad - 2}" y1="${gridTop}" x2="${leftPad + gridW + 2}" y2="${gridTop}" stroke="currentColor" stroke-width="4" stroke-linecap="round"></line>`;
   } else {
-    // Label base fret e.g. "3fr"
     html += `<text x="${leftPad - 8}" y="${gridTop + stepY/2 + 4}" font-size="${width * 0.08}" fill="currentColor" text-anchor="end" opacity="0.7">${displayBaseFret}fr</text>`;
   }
   
@@ -142,6 +230,9 @@ export function drawChordDiagram(chord, customContainer) {
     }
   });
   
+  // Instrument Header
+  html += `<text x="${width / 2}" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-weight="600" opacity="0.7">GUITAR FRETBOARD</text>`;
+
   svg.innerHTML = html;
   container.appendChild(svg);
 }

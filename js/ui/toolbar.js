@@ -108,6 +108,11 @@ export function initToolbar(cb) {
       
       saveSettings({ ...settings, instrument: newInst });
       renderInstrumentSelector();
+      
+      // Refresh the diagram visualization instantly
+      if (callbacks.renderFocusView) {
+        callbacks.renderFocusView();
+      }
     });
   }
 }
