@@ -1,34 +1,36 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Background Gradient (Deep dark to charcoal) -->
+    <!-- Background Gradient -->
     <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#18181b"/>
       <stop offset="100%" stop-color="#09090b"/>
     </linearGradient>
-    <!-- Accent Orange Gradient (Theme Primary Colors) -->
+    <!-- Accent Orange Gradient -->
     <linearGradient id="orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffedd5"/>
       <stop offset="50%" stop-color="#f97316"/>
       <stop offset="100%" stop-color="#ea580c"/>
     </linearGradient>
-    <!-- Soft Glow effect -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
+    <!-- Glow effect -->
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
-  <!-- Premium rounded square container -->
+  <!-- Premium rounded square background container -->
   <rect width="180" height="180" rx="45" fill="url(#bg-grad)"/>
   <rect x="2" y="2" width="176" height="176" rx="43" stroke="#27272a" stroke-width="4"/>
 
-  <!-- Cadence Corrected Eighth Note Logo -->
-  <!-- Note Head (Rotated Ellipse) -->
-  <ellipse cx="60" cy="120" rx="18" ry="13" transform="rotate(-25 60 120)" fill="url(#orange-grad)" filter="url(#glow)"/>
-  
-  <!-- Stem -->
-  <path d="M75 120V45" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
-  
-  <!-- Corrected Classical Eighth Note Flag (Fill-based vector tail) -->
-  <path d="M75 45C100 48 120 70 112 102C106 88 92 78 75 75Z" fill="url(#orange-grad)" filter="url(#glow)"/>
+  <!-- Centered and Proportional Eighth Note (♪) -->
+  <g filter="url(#glow)">
+    <!-- Note Head (Rotated Ellipse) -->
+    <ellipse cx="69" cy="123" rx="18" ry="13" transform="rotate(-25 69 123)" fill="url(#orange-grad)"/>
+    
+    <!-- Note Stem (Straight vertical line aligned with head and flag) -->
+    <path d="M84 123V48" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round"/>
+    
+    <!-- Note Flag (Eighth note tail, gracefully sweeping down and inward) -->
+    <path d="M84 48C105 52 122 70 116 98C110 84 98 78 84 76Z" fill="url(#orange-grad)"/>
+  </g>
 </svg>
