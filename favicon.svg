@@ -25,12 +25,12 @@
   <!-- Centered and Proportional Eighth Note (♪) -->
   <g filter="url(#glow)">
     <!-- Note Head (Rotated Ellipse) -->
-    <ellipse cx="69" cy="123" rx="18" ry="13" transform="rotate(-25 69 123)" fill="url(#orange-grad)"/>
+    <ellipse cx="71" cy="123" rx="18" ry="13" transform="rotate(-25 71 123)" fill="url(#orange-grad)"/>
     
-    <!-- Note Stem (Straight vertical line aligned with head and flag) -->
-    <path d="M84 123V48" stroke="url(#orange-grad)" stroke-width="10" stroke-linecap="round"/>
+    <!-- Note Stem (Using rect with explicit fill instead of stroke-based path to guarantee rendering across all browsers) -->
+    <rect x="81" y="48" width="10" height="75" rx="2" fill="url(#orange-grad)"/>
     
-    <!-- Note Flag (Eighth note tail, gracefully sweeping down and inward) -->
-    <path d="M84 48C105 52 122 70 116 98C110 84 98 78 84 76Z" fill="url(#orange-grad)"/>
+    <!-- Note Flag (Eighth note tail, starting flush from the stem's right edge at X=91) -->
+    <path d="M91 48C112 52 130 70 124 98C118 84 105 78 91 76Z" fill="url(#orange-grad)"/>
   </g>
 </svg>
