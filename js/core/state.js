@@ -31,12 +31,13 @@ class StateStore {
         this.listeners[path].forEach(cb => cb(value, oldValue));
       }
       
-      // 2. Notify parent path subscribers (e.g. 'playback')
+      // 2. Notify ancestor path subscribers recursively (e.g. 'playback.currentSlot' -> 'playback')
       const parts = path.split('.');
-      if (parts.length > 1) {
-        const parentPath = parts.slice(0, -1).join('.');
-        if (this.listeners[parentPath]) {
-          this.listeners[parentPath].forEach(cb => cb(this.getNestedValue(parentPath), null));
+      while (parts.length > 1) {
+        parts.pop();
+        const ancestorPath = parts.join('.');
+        if (this.listeners[ancestorPath]) {
+          this.listeners[ancestorPath].forEach(cb => cb(this.getNestedValue(ancestorPath), null));
         }
       }
     };
