@@ -906,13 +906,15 @@ header .pulse-dot {
 
   /* Transport Bar (Toolbar) 모바일 최적화 */
   .transport-bar {
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
   }
 
   .transport-container {
     flex-wrap: wrap;
     justify-content: space-between;
+    align-items: center;
     gap: 0.5rem;
+    padding: 0 0.25rem;
   }
 
   /* 재생 버튼 그룹 1행 배치 */
@@ -1022,27 +1024,27 @@ header .pulse-dot {
 
   /* 모바일 대형/예측 카드 사이즈 및 배치 조절 */
   .focus-cards-container {
-    gap: 0.5rem;
+    gap: 0.625rem;
     align-items: stretch;
     width: 100%;
+    justify-content: center;
   }
 
   .focus-chord-card {
-    padding: 0.875rem 0.5rem;
+    padding: 1rem 0.5rem;
     gap: 0.25rem;
   }
 
   .focus-chord-card.current-card {
-    flex: 1.3;
+    flex: 1.15;
     max-width: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 0 25px var(--primary-glow);
   }
 
   .focus-chord-card.next-card {
-    flex: 0.7;
+    flex: 0.85;
     max-width: 100%;
-    transform: scale(0.95);
-    padding: 0.75rem 0.375rem;
+    transform: scale(0.96);
   }
 
   .focus-chord-name {
@@ -1207,18 +1209,21 @@ header .pulse-dot {
     font-size: 0.75rem;
   }
   .key-chips {
-    display: flex;
-    flex-wrap: nowrap; /* 가로 한 줄로 유지 */
-    overflow-x: auto; /* 가로 스크롤 지원 */
-    width: 100%;
-    padding-bottom: 0.375rem;
+    display: grid;
+    grid-template-cols: repeat(6, 1fr);
     gap: 0.25rem;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    padding-bottom: 0.125rem;
+    overflow-x: visible;
   }
   .key-chip {
-    flex-shrink: 0; /* 찌그러짐 방지 */
-    padding: 0.25rem 0.5rem;
+    width: 100%;
+    padding: 0.375rem 0;
     font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }
 

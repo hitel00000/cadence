@@ -49,7 +49,7 @@ function drawPianoDiagram(chord, container) {
 
   const width = 160;
   const height = 176;
-  const topPad = 26;
+  const topPad = 32;
   const leftPad = 8;
   const rightPad = 8;
   const bottomPad = 14;
@@ -101,7 +101,7 @@ function drawPianoDiagram(chord, container) {
   });
 
   // 3. Instrument Header
-  html += `<text x="${width / 2}" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-weight="600" opacity="0.7">PIANO KEYBOARD</text>`;
+  html += `<text x="${width / 2}" y="14" font-size="8.5" fill="currentColor" text-anchor="middle" font-weight="700" letter-spacing="1.2" opacity="0.4">PIANO KEYBOARD</text>`;
 
   svg.innerHTML = html;
   container.appendChild(svg);
@@ -231,7 +231,7 @@ function drawGuitarDiagram(chord, container) {
   });
   
   // Instrument Header
-  html += `<text x="${width / 2}" y="16" font-size="10" fill="currentColor" text-anchor="middle" font-weight="600" opacity="0.7">GUITAR FRETBOARD</text>`;
+  html += `<text x="${width / 2}" y="14" font-size="8.5" fill="currentColor" text-anchor="middle" font-weight="700" letter-spacing="1.2" opacity="0.4">GUITAR FRETBOARD</text>`;
 
   svg.innerHTML = html;
   container.appendChild(svg);
