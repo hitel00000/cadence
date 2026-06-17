@@ -65,9 +65,9 @@
   - [x] `js/ui/practice.js` 파일 생성 및 `renderFocusView`, `updateFocusViewActiveSlot`, `rebuildFocusTimeline`, `initLoopABOptions` 이관
   - [x] A-B Loop 시작/종료 마디 변경 핸들러 및 스토어 범위 지정 연동
   - [x] Wake Lock API 화면 꺼짐 방지 제어 로직(`requestWakeLock`/`releaseWakeLock`/`checkWakeLockSupport`) 이관
-- [ ] **R-008**: 그리드 코드 진행 편집기 추출 (`js/ui/editor.js`)
-  - [ ] `js/ui/editor.js` 파일 생성 및 `renderEditor`, `addSection`, `removeSection` 이관
-  - [ ] 마디 슬롯 클릭 시 코드 선택 모달 호출하는 중재 이벤트 가교 구현
+- [x] **R-008**: 그리드 코드 진행 편집기 추출 (`js/ui/editor.js`)
+  - [x] `js/ui/editor.js` 파일 생성 및 `renderEditor`, `addSection`, `removeSection` 이관
+  - [x] 마디 슬롯 클릭 시 코드 선택 모달 호출하는 중재 이벤트 가교 구현
 
 ### 🟪 4단계: 진입점 통합 및 검증
 - [ ] **R-009**: 메인 `js/app.js` 경량화 및 중재자 역할 축소
