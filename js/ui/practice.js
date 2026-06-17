@@ -224,6 +224,8 @@ export function updateFocusViewActiveSlot(activeSlotIdx) {
   slots.forEach((slotChip, idx) => {
     if (idx === activeSlotIdx) {
       slotChip.classList.add("active");
+      // Auto-scroll the active slot into the center of the timeline view
+      slotChip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     } else {
       slotChip.classList.remove("active");
     }

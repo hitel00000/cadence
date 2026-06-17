@@ -829,6 +829,7 @@ header .pulse-dot {
   .transport-container {
     flex-wrap: wrap;
     justify-content: space-between;
+    gap: 0.375rem;
   }
   
   .play-controls {
@@ -842,6 +843,48 @@ header .pulse-dot {
     order: 3;
     width: 100%;
     text-align: center;
+  }
+
+  /* 모바일 레이아웃 최적화 */
+  .main-content {
+    padding: 0.5rem;
+  }
+
+  .practice-focus-view {
+    gap: 1rem;
+    min-height: auto;
+    padding-bottom: 1rem;
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .focus-chord-card {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .focus-chord-name {
+    font-size: 3rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .focus-diagram-container {
+    min-height: 120px;
+    padding: 0.5rem 0;
+  }
+
+  .focus-loop-controls {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
+
+  .chord-slot {
+    height: 3rem;
+  }
+
+  .chord-text {
+    font-size: 0.75rem !important;
   }
 }
 
@@ -1021,6 +1064,7 @@ header .pulse-dot {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 /* Practice Focus Mode View */

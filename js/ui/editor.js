@@ -5,7 +5,7 @@
 import { dom } from './dom.js';
 import { state } from '../core/state.js';
 import { getDisplayString, createEmptySlot } from '../chordDb.js';
-import { saveSong } from '../core/storage.js';
+import { saveSong } from '../core/song.js';
 import { ICONS } from './icons.js';
 import { closePicker } from './picker.js';
 import { renderFocusView, initLoopABOptions, rebuildFocusTimeline } from './practice.js';

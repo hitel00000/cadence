@@ -51,7 +51,7 @@ import {
 document.addEventListener("DOMContentLoaded", () => {
   cacheDOMElements();
   
-  // Initialize Controllers & Bindings
+  // 1. Initialize core controllers
   initSongController({
     renderKeyChips,
     stopSequencer,
@@ -63,8 +63,14 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePositionDisplay
   });
   
+  // 2. Bind UI events & callbacks first to prevent initialization race conditions
+  bindEvents();
+  
+  // 3. Load actual data
   loadSong();
   loadPatterns();
+  
+  // 4. Perform initial rendering and layout setup
   renderHeader();
   renderToolbar();
   renderInstrumentSelector();
@@ -73,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
   checkWakeLockSupport();
   renderEditor();
   renderKeyChips();
-  bindEvents();
 });
 
 function renderHeader() {
@@ -114,6 +119,9 @@ export function updatePlayheadDOM(activeSlotIdx) {
       dot.className = "beat-dot";
       activeBtn.appendChild(dot);
     }
+
+    // Auto-scroll the active slot into view when editing/playing in grid mode
+    activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }
 }
 

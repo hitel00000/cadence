@@ -4,7 +4,8 @@
 
 import { dom } from './dom.js';
 import { state } from '../core/state.js';
-import { loadSettings, saveSettings, saveSong } from '../core/storage.js';
+import { loadSettings, saveSettings } from '../core/storage.js';
+import { saveSong } from '../core/song.js';
 
 const STROKE_TEXT = { strong: "Strong", soft: "Soft", arpeggio: "Arpeggio" };
 const STROKE_SYMBOL = { strong: "↓↓", soft: "↕↕", arpeggio: "~" };
