@@ -96,22 +96,19 @@ export function patternToSong(pattern, targetKey) {
   const transposedPattern = transposePattern(pattern, targetKey);
   const chords = transposedPattern.chords || [];
 
-  // 2. Build bars from chords
-  const bars = chords.map(chordStr => {
-    if (chordStr === "—") {
-      // 1 bar of rest
-      return {
-        slots: [createEmptySlot(), createEmptySlot()]
-      };
-    }
+  // 2. Build bars from chords (2 items per bar)
+  const bars = [];
+  for (let i = 0; i < chords.length; i += 2) {
+    const ch1 = chords[i];
+    const ch2 = chords[i + 1];
     
-    const chordSlot = parseChordStringToSlot(chordStr);
-    const continueSlot = createContinueSlot();
+    const slot1 = ch1 ? parseChordStringToSlot(ch1) : createEmptySlot();
+    const slot2 = ch2 ? parseChordStringToSlot(ch2) : (ch1 && ch1 !== "—" ? createContinueSlot() : createEmptySlot());
     
-    return {
-      slots: [chordSlot, continueSlot]
-    };
-  });
+    bars.push({
+      slots: [slot1, slot2]
+    });
+  }
 
   // 3. Chunk bars into sections of exactly 4 bars (to align with the 1 Section = 4 Bars constraint)
   const sections = [];
