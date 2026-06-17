@@ -1,0 +1,17 @@
+{
+  "bookId": "guitar-chord-recipes",
+  "bookTitle": "기타 코드 레시피 (연습용)",
+  "patterns": [
+    {
+      "id": "recipe-01",
+      "title": "밝은 메이저 진행 (A-01)",
+      "category": "A 멜로디",
+      "defaultKey": "C",
+      "meter": "4/4",
+      "chords": ["C", "F", "G", "Am", "C", "F", "G", "C"],
+      "degrees": ["I", "IV", "V", "vi", "I", "IV", "V", "I"],
+      "feel": ["strong", "soft", "arpeggio"],
+      "difficulty": "Easy"
+    }
+  ]
+}

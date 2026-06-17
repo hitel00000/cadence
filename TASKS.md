@@ -7,19 +7,19 @@
 ## 📅 단계별 세부 태스크
 
 ### 🟦 1단계: 코어 인프라 구축 (Dynamic Transposition & Data Layer)
-* [ ] **정적 책 패턴 데이터 추가**
-  * [ ] `data/books` 디렉토리 생성
-  * [ ] `data/books/three-minute-chord-cooking.json` 파일 생성 및 첫 샘플 패턴(`A 멜로디-01 밝은 코드진행`) 데이터 입력
-* [ ] **동적 전조 엔진 (`js/core/transpose.js`) 개발**
-  * [ ] 12개 근음 리스트 및 반음 인덱스 맵 정의 (`['C', 'C#', 'Db', ..., 'B']`)
-  * [ ] 단일 코드 전조 함수 `transposeChord(chord, semitones)` 구현 (품질/텐션 유지 및 근음 시프트)
-  * [ ] 분수 코드(Slash Chord) 슬래시 베이스 노트의 동적 전조 로직 통합
-  * [ ] 패턴 전체 코드를 타겟 키로 변환하는 `transposePattern(pattern, targetKey)` 함수 구현
-* [ ] **데이터 저장 레이어 (`js/core/storage.js`) 구현**
-  * [ ] `app.js`에서 localStorage 저장 책임을 분리하여 `storage.js`로 이관
-  * [ ] 레거시 `cadence_song` 키 검출 시 `cadence:v1:currentSong`으로 자동 마이그레이션하는 로직 추가
-  * [ ] 사용자 설정(`settings`), 즐겨찾기(`favorites`), 최근 연습 패턴(`recent`)용 로컬 스토리지 CRUD 인터페이스 구현
-  * [ ] 내보내기/가져오기(Import/Export) 함수 구현 및 데이터 유효성 스키마 검증기 (`validateImportData`) 구현
+* [x] **정적 책 패턴 데이터 추가**
+  * [x] `static/books` 디렉토리 생성
+  * [x] `static/books/guitar-chord-recipes.json` 파일 생성 및 첫 샘플 패턴(`밝은 메이저 진행 (A-01)`) 데이터 입력
+* [x] **동적 전조 엔진 (`js/core/transpose.js`) 개발**
+  * [x] 12개 근음 리스트 및 반음 인덱스 맵 정의 (`['C', 'C#', 'Db', ..., 'B']`)
+  * [x] 단일 코드 전조 함수 `transposeChord(chord, semitones)` 구현 (품질/텐션 유지 및 근음 시프트)
+  * [x] 분수 코드(Slash Chord) 슬래시 베이스 노트의 동적 전조 로직 통합
+  * [x] 패턴 전체 코드를 타겟 키로 변환하는 `transposePattern(pattern, targetKey)` 함수 구현
+* [x] **데이터 저장 레이어 (`js/core/storage.js`) 구현**
+  * [x] `app.js`에서 localStorage 저장 책임을 분리하여 `storage.js`로 이관
+  * [x] 레거시 `cadence_song` 키 검출 시 `cadence:v1:currentSong`으로 자동 마이그레이션하는 로직 추가
+  * [x] 사용자 설정(`settings`), 즐겨찾기(`favorites`), 최근 연습 패턴(`recent`)용 로컬 스토리지 CRUD 인터페이스 구현
+  * [x] 내보내기/가져오기(Import/Export) 함수 구현 및 데이터 유효성 스키마 검증기 (`validateImportData`) 구현
 
 ---
 
