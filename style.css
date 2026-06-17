@@ -714,13 +714,13 @@ header .pulse-dot {
 /* Button Grids */
 .grid-6 {
   display: grid;
-  grid-template-cols: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 0.375rem;
 }
 
 .grid-4 {
   display: grid;
-  grid-template-cols: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.375rem;
 }
 
@@ -888,7 +888,7 @@ header .pulse-dot {
 /* Media Queries */
 @media (max-width: 600px) {
   .grid-6 {
-    grid-template-cols: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 
   /* Header 모바일 최적화 (토글 버튼 강제 줄바꿈 해결 & 2열 배치로 겹침 방지) */
@@ -1243,7 +1243,7 @@ header .pulse-dot {
   }
   .key-chips {
     display: grid;
-    grid-template-cols: repeat(6, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0.25rem;
     width: 100%;
     padding-bottom: 0.125rem;
@@ -1697,7 +1697,7 @@ header .pulse-dot {
 
 .pattern-list {
   display: grid;
-  grid-template-cols: minmax(0, 1fr); /* Prevent expansion of grid track beyond viewport */
+  grid-template-columns: minmax(0, 1fr); /* Prevent expansion of grid track beyond viewport */
   gap: 0.75rem;
 }
 
