@@ -186,6 +186,7 @@ export function renderPicker() {
 }
 
 function renderButtonGrid(container, list, activeValue, type, onSelect, isDisabled) {
+  if (!container) return;
   container.innerHTML = "";
   
   list.forEach(item => {

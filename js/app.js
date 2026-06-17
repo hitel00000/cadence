@@ -90,6 +90,7 @@ export function updatePlayheadDOM(activeSlotIdx) {
 
   if (state.uiMode === "practice") {
     renderFocusView();
+    return; // Skip edit grid DOM updates in practice mode
   }
 
   // Remove playheads and active beat dots from all buttons
@@ -99,9 +100,6 @@ export function updatePlayheadDOM(activeSlotIdx) {
     const dot = slotBtn.querySelector(".beat-dot");
     if (dot) dot.remove();
   });
-  
-  state.playback.currentSlot = activeSlotIdx;
-  updatePositionDisplay();
   
   // Add playhead to the active button
   const activeBtn = document.querySelector(`.chord-slot[data-slot-idx="${activeSlotIdx}"]`);
