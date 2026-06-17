@@ -237,8 +237,15 @@ export function updateFocusViewActiveSlot(activeSlotIdx) {
   slots.forEach((slotChip, idx) => {
     if (idx === activeSlotIdx) {
       slotChip.classList.add("active");
-      // Auto-scroll the active slot into the center of the timeline view
-      slotChip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      // Auto-scroll the active slot into the center of the timeline view (horizontal scroll only)
+      const parent = slotChip.parentElement;
+      if (parent) {
+        const chipLeft = slotChip.offsetLeft;
+        const chipWidth = slotChip.offsetWidth;
+        const parentWidth = parent.offsetWidth;
+        const scrollTarget = chipLeft - (parentWidth / 2) + (chipWidth / 2);
+        parent.scrollTo({ left: scrollTarget, behavior: "smooth" });
+      }
     } else {
       slotChip.classList.remove("active");
     }
