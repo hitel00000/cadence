@@ -88,10 +88,23 @@ export function initLibraryDrawer(cb) {
         if (dom.currentPatternTitle) {
           dom.currentPatternTitle.textContent = newPattern.title;
         }
+        updateSaveButtonVisibility();
         alert(`"${newPattern.title}" 패턴이 라이브러리에 저장되었습니다!`);
         renderLibraryDrawer();
       });
     });
+  }
+  
+  // Initial visibility setup
+  updateSaveButtonVisibility();
+}
+
+export function updateSaveButtonVisibility() {
+  if (!dom.savePatternBtn) return;
+  if (state.currentPattern === null) {
+    dom.savePatternBtn.style.display = "inline-flex";
+  } else {
+    dom.savePatternBtn.style.display = "none";
   }
 }
 
@@ -207,6 +220,7 @@ export function renderPatternList() {
       if (callbacks.renderToolbar) callbacks.renderToolbar();
       if (callbacks.renderEditor) callbacks.renderEditor();
       if (callbacks.renderKeyChips) callbacks.renderKeyChips();
+      updateSaveButtonVisibility();
     });
     dom.libraryPatternList.appendChild(customCard);
   }
@@ -255,6 +269,7 @@ export function renderPatternList() {
         closeLibraryDrawer();
         if (callbacks.applyPatternChange) callbacks.applyPatternChange();
         if (callbacks.renderKeyChips) callbacks.renderKeyChips();
+        updateSaveButtonVisibility();
       });
       
       dom.libraryPatternList.appendChild(card);

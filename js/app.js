@@ -17,7 +17,7 @@ import { state } from './core/state.js';
 import { checkWakeLockSupport } from './ui/practice.js';
 
 // Module Imports
-import { initLibraryDrawer, loadPatterns } from './ui/library.js';
+import { initLibraryDrawer, loadPatterns, updateSaveButtonVisibility } from './ui/library.js';
 import { initChordPicker, openPicker, closePicker, renderPicker, isPickerOpen } from './ui/picker.js';
 import { initToolbar, renderToolbar, updatePositionDisplay, renderInstrumentSelector } from './ui/toolbar.js';
 import { 
@@ -131,6 +131,7 @@ function selectSlot(sIdx, bIdx, slIdx) {
     if (dom.currentPatternTitle) {
       dom.currentPatternTitle.textContent = "자유 연주곡";
     }
+    updateSaveButtonVisibility();
     renderKeyChips();
     saveSong();
   }
@@ -327,6 +328,8 @@ function bindEvents() {
     renderKeyChips,
     applyPatternChange
   });
+  
+  updateSaveButtonVisibility();
 
   // Mobile layout & Settings drawer toggle setup
   setupMobileLayout();
