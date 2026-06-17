@@ -43,10 +43,10 @@
   - [x] `app.js`의 직관적인 `state.xxx = yyy` 직접 변경부들을 스토어 액션 및 구독 구조로 마이그레이션
 
 ### 🟪 2단계: 독립 UI 컴포넌트 분리
-- [ ] **R-003**: 운지 다이어그램 모듈 추출 (`js/ui/diagram.js`)
-  - [ ] `js/ui/diagram.js` 파일 생성 및 `drawChordDiagram(chord, container)` 이관
-  - [ ] 다이어그램 내부 SVG 드로잉 및 눈금 계산 헬퍼 격리
-  - [ ] `app.js` 및 Chord Picker 모달 등 지판 운지가 필요한 곳에서 임포트 호출 연동
+- [x] **R-003**: 운지 다이어그램 모듈 추출 (`js/ui/diagram.js`)
+  - [x] `js/ui/diagram.js` 파일 생성 및 `drawChordDiagram(chord, container)` 이관
+  - [x] 다이어그램 내부 SVG 드로잉 및 눈금 계산 헬퍼 격리
+  - [x] `app.js` 및 Chord Picker 모달 등 지판 운지가 필요한 곳에서 임포트 호출 연동
 - [ ] **R-004**: 패턴 라이브러리 드로어 추출 (`js/ui/library.js`)
   - [ ] `js/ui/library.js` 파일 생성 및 드로어 전용 UI 빌더 이관
   - [ ] `renderLibraryDrawer`, `renderPatternList`, `openLibraryDrawer`, `closeLibraryDrawer` 이관
