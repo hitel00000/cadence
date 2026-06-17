@@ -27,9 +27,7 @@ import { dom, cacheDOMElements } from './ui/dom.js';
 import { store, state } from './core/state.js';
 import { initLibraryDrawer, loadPatterns } from './ui/library.js';
 import { initChordPicker, openPicker, closePicker, renderPicker, isPickerOpen } from './ui/picker.js';
-
-const STROKE_TEXT = { strong: "Strong", soft: "Soft", arpeggio: "Arpeggio" };
-const STROKE_SYMBOL = { strong: "↓↓", soft: "↕↕", arpeggio: "~" };
+import { initToolbar, renderToolbar, updatePositionDisplay, renderInstrumentSelector } from './ui/toolbar.js';
 
 
 
@@ -103,30 +101,7 @@ function renderHeader() {
   dom.sectionCount.textContent = `${count} section${count !== 1 ? 's' : ''}`;
 }
 
-function renderToolbar() {
-  dom.bpmInput.value = state.song.bpm;
-  
-  const strokeSymbol = STROKE_SYMBOL[state.song.stroke] || "~";
-  const strokeText = STROKE_TEXT[state.song.stroke] || "Arpeggio";
-  dom.strokeSelector.querySelector(".stroke-symbol").textContent = strokeSymbol;
-  dom.strokeSelector.querySelector(".stroke-text").textContent = strokeText;
-  dom.strokeSelector.title = `Stroke: ${strokeText}`;
-  
-  if (state.song.loop) {
-    dom.loopToggle.classList.add("active");
-  } else {
-    dom.loopToggle.classList.remove("active");
-  }
-  
-  updatePositionDisplay();
-}
 
-function updatePositionDisplay() {
-  const currentSlot = state.playback.currentSlot;
-  const currentBar = Math.floor(currentSlot / 2);
-  const totalBars = state.song.sections.length * 4;
-  dom.positionDisplay.textContent = `${currentBar + 1}/${totalBars}`;
-}
 
 function renderEditor() {
   if (state.uiMode === "practice") {
@@ -595,71 +570,10 @@ function getSlotByAbsoluteIndex(absIdx) {
 // ─── Event Binding ───
 
 function bindEvents() {
-  // BPM Inputs
-  dom.bpmInput.addEventListener("change", (e) => {
-    let bpm = parseInt(e.target.value) || 120;
-    bpm = Math.max(40, Math.min(240, bpm));
-    state.song.bpm = bpm;
-    dom.bpmInput.value = bpm;
-    saveSong();
-    
-    // If playing, restart sequencer to apply BPM change immediately
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
-  });
-  
-  dom.bpmDown.addEventListener("click", () => {
-    state.song.bpm = Math.max(40, state.song.bpm - 1);
-    dom.bpmInput.value = state.song.bpm;
-    saveSong();
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
-  });
-  
-  dom.bpmUp.addEventListener("click", () => {
-    state.song.bpm = Math.min(240, state.song.bpm + 1);
-    dom.bpmInput.value = state.song.bpm;
-    saveSong();
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
-  });
-  
-  // Prevent button focus grabbing on click
-  dom.bpmDown.addEventListener("pointerdown", e => e.preventDefault());
-  dom.bpmUp.addEventListener("pointerdown", e => e.preventDefault());
-  
-  // Stroke Selector
-  dom.strokeSelector.addEventListener("click", () => {
-    const list = ["strong", "soft", "arpeggio"];
-    const idx = list.indexOf(state.song.stroke);
-    state.song.stroke = list[(idx + 1) % 3];
-    saveSong();
-    renderToolbar();
-    
-    // Restart if playing
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
-  });
-  
-  // Loop Toggle
-  dom.loopToggle.addEventListener("click", () => {
-    state.song.loop = !state.song.loop;
-    saveSong();
-    renderToolbar();
-    
-    // Restart if playing
-    if (state.playback.isPlaying) {
-      stopSequencer();
-      startPlayback();
-    }
+  // Initialize Playback Toolbar Component
+  initToolbar({
+    stopSequencer,
+    startPlayback
   });
   
   // Sequencer control actions
@@ -732,17 +646,7 @@ function bindEvents() {
     });
   }
 
-  // Instrument Selector
-  if (dom.instrumentSelector) {
-    dom.instrumentSelector.addEventListener("click", () => {
-      const settings = loadSettings() || { instrument: "guitar" };
-      const currentInst = settings.instrument || "guitar";
-      const newInst = currentInst === "piano" ? "guitar" : "piano";
-      
-      saveSettings({ ...settings, instrument: newInst });
-      renderInstrumentSelector();
-    });
-  }
+
 
   // Focus Loop A-B and settings selectors
   const loopAbBtn = document.getElementById("loop-ab-btn");
@@ -1005,20 +909,7 @@ function initLoopABOptions() {
   endSelect.value = state.playback.loopEndBar;
 }
 
-function renderInstrumentSelector() {
-  const settings = loadSettings() || { instrument: "guitar" };
-  const inst = settings.instrument || "guitar";
-  const symbol = inst === "piano" ? "🎹" : "🎸";
-  const text = inst === "piano" ? "Piano" : "Guitar";
-  
-  if (dom.instrumentSelector) {
-    const symbolEl = dom.instrumentSelector.querySelector(".instrument-symbol");
-    const textEl = dom.instrumentSelector.querySelector(".instrument-text");
-    if (symbolEl) symbolEl.textContent = symbol;
-    if (textEl) textEl.textContent = text;
-    dom.instrumentSelector.title = `Instrument: ${text}`;
-  }
-}
+
 
 // ─── Wake Lock API Integration ───
 let wakeLock = null;

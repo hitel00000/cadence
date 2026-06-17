@@ -57,10 +57,10 @@
   - [x] 모달 확인(Confirm) 및 초기화(Clear) 클릭 핸들러 동작 및 상태 동기화 격리
 
 ### 🟪 3단계: 코어 뷰 컴포넌트 분리
-- [ ] **R-006**: 재생 제어 툴바 추출 (`js/ui/toolbar.js`)
-  - [ ] `js/ui/toolbar.js` 파일 생성 및 `renderToolbar`, `updatePositionDisplay` 이관
-  - [ ] BPM Input, Up/Down 버튼, 스트로크 셀렉터, 루프 토글 클릭 핸들러 바인딩 이관
-  - [ ] 악기 선택기(Guitar vs Piano) 클릭 스위치 동작 연동
+- [x] **R-006**: 재생 제어 툴바 추출 (`js/ui/toolbar.js`)
+  - [x] `js/ui/toolbar.js` 파일 생성 및 `renderToolbar`, `updatePositionDisplay` 이관
+  - [x] BPM Input, Up/Down 버튼, 스트로크 셀렉터, 루프 토글 클릭 핸들러 바인딩 이관
+  - [x] 악기 선택기(Guitar vs Piano) 클릭 스위치 동작 연동
 - [ ] **R-007**: 연습 포커스 뷰 추출 (`js/ui/practice.js`)
   - [ ] `js/ui/practice.js` 파일 생성 및 `renderFocusView`, `updateFocusViewActiveSlot`, `rebuildFocusTimeline`, `initLoopABOptions` 이관
   - [ ] A-B Loop 시작/종료 마디 변경 핸들러 및 스토어 범위 지정 연동
