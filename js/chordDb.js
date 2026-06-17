@@ -115,7 +115,41 @@ export function mapShapeToNotes(shape) {
 // Generate fallback voicing dynamically when shape is not in database (returns 6 elements)
 export function generateFallbackVoicing(chord) {
   const rootOffset = ob[chord.root ?? "C"] ?? 0;
-  const intervals = rb[chord.quality] ?? [0, 4, 7];
+  
+  // 1. Base triad intervals
+  let intervals = [0, 4, 7]; // default major
+  if (chord.quality === "minor") {
+    intervals = [0, 3, 7];
+  } else if (chord.quality === "dim") {
+    intervals = [0, 3, 6];
+  } else if (chord.quality === "aug") {
+    intervals = [0, 4, 8];
+  }
+  
+  // 2. Adjust for sus2 / sus4
+  if (chord.tension === "sus2") {
+    intervals = [0, 2, 7];
+  } else if (chord.tension === "sus4") {
+    intervals = [0, 5, 7];
+  }
+  
+  // 3. Add 7th tensions
+  if (chord.tension === "7") {
+    const seventh = chord.quality === "dim" ? 9 : 10;
+    if (!intervals.includes(seventh)) intervals.push(seventh);
+  } else if (chord.tension === "maj7") {
+    if (!intervals.includes(11)) intervals.push(11);
+  }
+  
+  // 4. Add extensions
+  if (chord.extension === "9" || chord.extension === "add9") {
+    if (!intervals.includes(2)) intervals.push(2);
+  } else if (chord.extension === "11" || chord.extension === "add11") {
+    if (!intervals.includes(5)) intervals.push(5);
+  } else if (chord.extension === "13") {
+    if (!intervals.includes(9)) intervals.push(9);
+  }
+  
   const notes = [-1, -1, -1, -1, -1, -1];
   
   for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
@@ -142,7 +176,29 @@ export function generateFallbackVoicing(chord) {
 export function resolveChordNotes(chord) {
   if (!chord || !chord.root) return [];
   const shape = resolveChordShape(chord);
-  return shape ? mapShapeToNotes(shape) : generateFallbackVoicing(chord);
+  const notes = shape ? mapShapeToNotes(shape) : generateFallbackVoicing(chord);
+  
+  // Apply Slash Chord Bass Note Heuristic
+  if (chord.bassNote) {
+    const bassOffset = ob[chord.bassNote];
+    if (bassOffset !== undefined) {
+      // Clean low strings
+      notes[0] = -1;
+      notes[1] = -1;
+      
+      // Heuristic: E, F, F#, G, G# (offsets 4, 5, 6, 7, 8) are played on 6th string (index 0).
+      // A, Bb, B, C, C#, D, Eb (offsets 9, 10, 11, 0, 1, 2, 3) are played on 5th string (index 1).
+      if (bassOffset >= 4 && bassOffset <= 8) {
+        const fret = bassOffset - 4;
+        notes[0] = 40 + fret;
+      } else {
+        const fret = (bassOffset - 9 + 12) % 12;
+        notes[1] = 45 + fret;
+      }
+    }
+  }
+  
+  return notes;
 }
 
 export const chordDb = {

@@ -81,6 +81,12 @@
         <span class="stroke-symbol">~</span>
         <span class="stroke-text">Arpeggio</span>
       </button>
+
+      <!-- Instrument Selector -->
+      <button class="instrument-selector" data-testid="instrument-selector" title="Instrument: Guitar">
+        <span class="instrument-symbol">🎸</span>
+        <span class="instrument-text">Guitar</span>
+      </button>
       
       <!-- Loop Toggle -->
       <button class="loop-toggle active" data-testid="loop-toggle" title="Loop"></button>
@@ -110,7 +116,33 @@
     
     <!-- Focus Practice View (Practice Mode) -->
     <div class="practice-focus-view" id="practice-focus-view">
-      <!-- Rendered dynamically by JS -->
+      <!-- Focus Loop & Practice Settings Panel -->
+      <div class="focus-loop-controls" id="focus-loop-controls">
+        <div class="focus-controls-row">
+          <button class="loop-ab-btn" id="loop-ab-btn" data-testid="loop-ab-btn">🔄 구간 반복 (A-B Loop) OFF</button>
+          <button class="wake-lock-btn active" id="wake-lock-btn" data-testid="wake-lock-btn">💡 화면 켜짐 유지 ON</button>
+        </div>
+        <div class="loop-ab-selectors" id="loop-ab-selectors" style="display: none;">
+          <div class="select-wrapper">
+            <span class="loop-select-label">시작 마디</span>
+            <select id="loop-start-bar-select" class="loop-select"></select>
+          </div>
+          <div class="select-wrapper">
+            <span class="loop-select-label">종료 마디</span>
+            <select id="loop-end-bar-select" class="loop-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Chord Card -->
+      <div class="focus-chord-card" id="focus-chord-card">
+        <div class="next-chord-badge" id="focus-next-badge">Next: —</div>
+        <div class="focus-chord-name" id="focus-chord-name">—</div>
+        <div class="focus-diagram-container" id="focus-diagram-container"></div>
+      </div>
+
+      <!-- Progression Preview Timeline -->
+      <div class="focus-progression-preview" id="focus-progression-preview"></div>
     </div>
   </main>
 

@@ -3,6 +3,7 @@
    ========================================================================== */
 
 import { resolveChordNotes } from './chordDb.js';
+import { loadSettings } from './core/storage.js';
 
 let audioCtx = null;
 let scheduleIntervalId = null;
@@ -104,6 +105,48 @@ export function pluckString(ctx, freq, startTime, volume, duration = 1.4) {
  * @param {number} startTime - start AudioContext time
  * @param {number} bpm - Beats Per Minute (used for timing arpeggiations and multi-strum)
  */
+function playPianoChord(ctx, notes, stroke, start, beatSec) {
+  const isArpeggio = stroke === "arpeggio";
+  
+  notes.forEach((note, si) => {
+    if (note < 0) return;
+    const freq = midiToFreq(note);
+    const delay = isArpeggio ? si * 0.045 : 0;
+    const t = start + delay;
+    
+    // 1. Warm Triangle fundamental
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, t);
+    
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.12, t + 0.005);
+    gainNode.gain.setValueAtTime(0.12, t + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, t + 2.0);
+    
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 2.2);
+    
+    // 2. Bell-like metallic attack (Rhodes-tines sine harmonic)
+    const tine = ctx.createOscillator();
+    const tineGain = ctx.createGain();
+    tine.type = "sine";
+    tine.frequency.setValueAtTime(freq * 2, t);
+    
+    tineGain.gain.setValueAtTime(0, t);
+    tineGain.gain.linearRampToValueAtTime(0.03, t + 0.005);
+    tineGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    
+    tine.connect(tineGain);
+    tineGain.connect(ctx.destination);
+    tine.start(t);
+    tine.stop(t + 0.5);
+  });
+}
+
 export function playChord(chord, stroke, startTime, bpm = 120) {
   const ctx = getAudioContext();
   resumeAudioContext();
@@ -113,6 +156,14 @@ export function playChord(chord, stroke, startTime, bpm = 120) {
 
   const start = startTime ?? ctx.currentTime;
   const beatSec = 60 / bpm;
+
+  // Branch by instrument setting
+  const settings = loadSettings();
+  const instrument = settings ? settings.instrument : "guitar";
+  if (instrument === "piano") {
+    playPianoChord(ctx, notes, stroke, start, beatSec);
+    return;
+  }
 
   if (stroke === "arpeggio") {
     // Arpeggio: pluck each string slowly
@@ -171,7 +222,7 @@ function findLastPlayedChord(startIndex, config) {
 
 /**
  * Start the sequencer playback loop
- * @param {Object} config - { bpm, stroke, loop, totalSlots, getSlot, onBeat, onEnd }
+ * @param {Object} config - { bpm, stroke, loop, totalSlots, loopStartSlot, loopEndSlot, getSlot, onBeat, onEnd }
  */
 export function startSequencer(config) {
   stopSequencer();
@@ -182,8 +233,10 @@ export function startSequencer(config) {
   // Each slot represents 2 beats in 4/4 time (since each bar is 4 beats and has 2 slots)
   const slotDuration = (60 / config.bpm) * 2;
   
+  const startSlot = config.loopStartSlot !== undefined ? config.loopStartSlot : 0;
+  
   schedulerState = {
-    nextSlotIndex: 0,
+    nextSlotIndex: startSlot,
     nextSlotTime: ctx.currentTime + 0.05
   };
 
@@ -215,14 +268,22 @@ export function startSequencer(config) {
       schedulerState.nextSlotIndex++;
       schedulerState.nextSlotTime += slotDuration;
 
-      // Handle non-looping end boundary
-      if (!config.loop && schedulerState.nextSlotIndex >= config.totalSlots) {
-        const stopDelayMs = (schedulerState.nextSlotTime - now) * 1000 + 100;
-        stopSequencer();
-        setTimeout(() => {
-          config.onEnd();
-        }, stopDelayMs);
-        return;
+      const loopStart = config.loopStartSlot !== undefined ? config.loopStartSlot : 0;
+      const loopEnd = config.loopEndSlot !== undefined ? config.loopEndSlot : (config.totalSlots - 1);
+
+      if (config.loop) {
+        if (schedulerState.nextSlotIndex > loopEnd) {
+          schedulerState.nextSlotIndex = loopStart;
+        }
+      } else {
+        if (schedulerState.nextSlotIndex > loopEnd) {
+          const stopDelayMs = (schedulerState.nextSlotTime - now) * 1000 + 100;
+          stopSequencer();
+          setTimeout(() => {
+            config.onEnd();
+          }, stopDelayMs);
+          return;
+        }
       }
     }
   }, SCHEDULER_INTERVAL);
@@ -238,10 +299,16 @@ export function stopSequencer() {
 }
 
 // Seek sequencer playhead to a specific slot index
-export function seekSequencer(slotIndex) {
+export function seekSequencer(slotIndex, loopStartSlot, loopEndSlot) {
   if (!schedulerState) return;
   const ctx = getAudioContext();
-  schedulerState.nextSlotIndex = slotIndex;
+  let targetIndex = slotIndex;
+  if (loopStartSlot !== undefined && loopEndSlot !== undefined) {
+    if (targetIndex < loopStartSlot || targetIndex > loopEndSlot) {
+      targetIndex = loopStartSlot;
+    }
+  }
+  schedulerState.nextSlotIndex = targetIndex;
   schedulerState.nextSlotTime = ctx.currentTime + 0.05;
 }
 
