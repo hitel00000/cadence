@@ -53,7 +53,29 @@ export function drawChordDiagram(chord, customContainer) {
   
   const baseFret = shape.baseFret ?? 1;
   const barre = shape.barre;
-  const frets = shape.frets;
+  
+  // Clone frets array to dynamically apply slash chord bass fingerings on low strings
+  const frets = [...shape.frets];
+  if (chord.bassNote) {
+    const ob = {
+      "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, 
+      "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
+    };
+    const bassOffset = ob[chord.bassNote];
+    if (bassOffset !== undefined) {
+      // Mute both low strings first to override with the new bass note fingering
+      frets[0] = -1;
+      frets[1] = -1;
+      
+      // 6th string bass notes (E, F, F#, G, G#)
+      if (bassOffset >= 4 && bassOffset <= 8) {
+        frets[0] = bassOffset - 4;
+      } else {
+        // 5th string bass notes (A, A#, B, C, C#, D, D#)
+        frets[1] = (bassOffset - 9 + 12) % 12;
+      }
+    }
+  }
   
   const activeFrets = frets.filter(f => f > 0);
   const minFret = barre ?? (activeFrets.length ? Math.min(...activeFrets) : 1);
