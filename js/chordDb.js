@@ -99,7 +99,24 @@ export function createContinueSlot() {
 export function resolveChordShape(chord) {
   if (!chord || !chord.root) return null;
   const key = getDbKey(chord);
-  return chordDb[key] ?? null;
+  if (chordDb[key]) return chordDb[key];
+  
+  // Try enharmonic root
+  const enharmonics = {
+    "C#": "Db", "Db": "C#",
+    "D#": "Eb", "Eb": "D#",
+    "F#": "Gb", "Gb": "F#",
+    "G#": "Ab", "Ab": "G#",
+    "A#": "Bb", "Bb": "A#"
+  };
+  const alternateRoot = enharmonics[chord.root];
+  if (alternateRoot) {
+    const alternateChord = { ...chord, root: alternateRoot };
+    const alternateKey = getDbKey(alternateChord);
+    if (chordDb[alternateKey]) return chordDb[alternateKey];
+  }
+  
+  return null;
 }
 
 // Map chord shape to absolute MIDI notes (returns 6 elements, -1 for muted strings)
@@ -213,8 +230,11 @@ export const chordDb = {
   "C#": {"frets":[-1,4,6,6,6,4],"barre":4,"baseFret":4},
   "C#m": {"frets":[-1,4,6,6,5,4],"barre":4,"baseFret":4},
   "C#7": {"frets":[-1,4,3,4,2,-1],"baseFret":4},
+  "C#maj7": {"frets":[-1,4,6,5,6,4],"barre":4,"baseFret":4},
   "Db": {"frets":[-1,4,6,6,6,4],"barre":4,"baseFret":4},
   "Dbm": {"frets":[-1,4,6,6,5,4],"barre":4,"baseFret":4},
+  "Db7": {"frets":[-1,4,3,4,2,-1],"baseFret":4},
+  "Dbmaj7": {"frets":[-1,4,6,5,6,4],"barre":4,"baseFret":4},
   "D": {"frets":[-1,-1,0,2,3,2]},
   "Dm": {"frets":[-1,-1,0,2,3,1]},
   "D7": {"frets":[-1,-1,0,2,1,2]},
@@ -225,8 +245,12 @@ export const chordDb = {
   "Ddim": {"frets":[-1,-1,0,1,3,1]},
   "D#": {"frets":[-1,6,8,8,8,6],"barre":6,"baseFret":6},
   "D#m": {"frets":[6,8,8,6,6,6],"barre":6,"baseFret":6},
+  "D#7": {"frets":[-1,6,5,6,4,-1],"baseFret":6},
+  "D#maj7": {"frets":[-1,6,8,7,8,6],"barre":6,"baseFret":6},
   "Eb": {"frets":[-1,6,8,8,8,6],"barre":6,"baseFret":6},
   "Ebm": {"frets":[6,8,8,6,6,6],"barre":6,"baseFret":6},
+  "Eb7": {"frets":[-1,6,5,6,4,-1],"baseFret":6},
+  "Ebmaj7": {"frets":[-1,6,8,7,8,6],"barre":6,"baseFret":6},
   "E": {"frets":[0,2,2,1,0,0]},
   "Em": {"frets":[0,2,2,0,0,0]},
   "E7": {"frets":[0,2,0,1,0,0]},
@@ -246,8 +270,11 @@ export const chordDb = {
   "F#": {"frets":[2,4,4,3,2,2],"barre":2,"baseFret":2},
   "F#m": {"frets":[2,4,4,2,2,2],"barre":2,"baseFret":2},
   "F#7": {"frets":[2,4,2,3,2,2],"barre":2,"baseFret":2},
+  "F#maj7": {"frets":[2,4,3,3,2,2],"barre":2,"baseFret":2},
   "Gb": {"frets":[2,4,4,3,2,2],"barre":2,"baseFret":2},
   "Gbm": {"frets":[2,4,4,2,2,2],"barre":2,"baseFret":2},
+  "Gb7": {"frets":[2,4,2,3,2,2],"barre":2,"baseFret":2},
+  "Gbmaj7": {"frets":[2,4,3,3,2,2],"barre":2,"baseFret":2},
   "G": {"frets":[3,2,0,0,0,3]},
   "Gm": {"frets":[3,5,5,3,3,3],"barre":3,"baseFret":3},
   "G7": {"frets":[3,2,0,0,0,1]},
@@ -259,8 +286,11 @@ export const chordDb = {
   "G#": {"frets":[4,6,6,5,4,4],"barre":4,"baseFret":4},
   "G#m": {"frets":[4,6,6,4,4,4],"barre":4,"baseFret":4},
   "G#7": {"frets":[4,6,4,5,4,4],"barre":4,"baseFret":4},
+  "G#maj7": {"frets":[4,6,5,5,4,4],"barre":4,"baseFret":4},
   "Ab": {"frets":[4,6,6,5,4,4],"barre":4,"baseFret":4},
   "Abm": {"frets":[4,6,6,4,4,4],"barre":4,"baseFret":4},
+  "Ab7": {"frets":[4,6,4,5,4,4],"barre":4,"baseFret":4},
+  "Abmaj7": {"frets":[4,6,5,5,4,4],"barre":4,"baseFret":4},
   "A": {"frets":[-1,0,2,2,2,0]},
   "Am": {"frets":[-1,0,2,2,1,0]},
   "A7": {"frets":[-1,0,2,0,2,0]},
@@ -272,8 +302,11 @@ export const chordDb = {
   "A#": {"frets":[-1,1,3,3,3,1],"barre":1,"baseFret":1},
   "A#m": {"frets":[-1,1,3,3,2,1],"barre":1,"baseFret":1},
   "A#7": {"frets":[-1,1,3,1,3,1],"barre":1,"baseFret":1},
+  "A#maj7": {"frets":[-1,1,3,2,3,1],"barre":1,"baseFret":1},
   "Bb": {"frets":[-1,1,3,3,3,1],"barre":1,"baseFret":1},
   "Bbm": {"frets":[-1,1,3,3,2,1],"barre":1,"baseFret":1},
+  "Bb7": {"frets":[-1,1,3,1,3,1],"barre":1,"baseFret":1},
+  "Bbmaj7": {"frets":[-1,1,3,2,3,1],"barre":1,"baseFret":1},
   "B": {"frets":[-1,2,4,4,4,2],"barre":2,"baseFret":2},
   "Bm": {"frets":[-1,2,4,4,3,2],"barre":2,"baseFret":2},
   "B7": {"frets":[-1,2,1,2,0,2]},
