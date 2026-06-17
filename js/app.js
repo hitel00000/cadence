@@ -667,6 +667,15 @@ function drawChordDiagram(chord) {
 // ─── Actions & Callbacks ───
 
 function selectSlot(sIdx, bIdx, slIdx) {
+  if (state.currentPattern) {
+    state.currentPattern = null;
+    if (dom.patternSelect) {
+      dom.patternSelect.value = "";
+    }
+    renderKeyChips();
+    saveSong(); // Saves transposed pattern as local custom song
+  }
+
   state.editing = { sectionIndex: sIdx, barIndex: bIdx, slotIndex: slIdx };
   
   // Force a rendering to show which slot is editing
@@ -741,6 +750,12 @@ function clearEditingChord() {
 }
 
 function addSection() {
+  if (state.currentPattern) {
+    state.currentPattern = null;
+    if (dom.patternSelect) dom.patternSelect.value = "";
+    renderKeyChips();
+  }
+
   const newSection = {
     bars: Array.from({ length: 4 }, () => ({
       slots: [createEmptySlot(), createEmptySlot()]
@@ -761,6 +776,12 @@ function addSection() {
 function removeSection(sIdx) {
   if (state.song.sections.length <= 1) return;
   
+  if (state.currentPattern) {
+    state.currentPattern = null;
+    if (dom.patternSelect) dom.patternSelect.value = "";
+    renderKeyChips();
+  }
+
   state.song.sections.splice(sIdx, 1);
   
   // Handle editor focus safety
@@ -1034,6 +1055,7 @@ async function loadPatterns() {
       const book = await response.json();
       state.books = [book];
       populatePatternSelect();
+      renderKeyChips(); // Ensure chips render with correct initial disabled state
     }
   } catch (e) {
     console.error("Failed to load static books:", e);
