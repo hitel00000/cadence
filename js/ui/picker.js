@@ -6,6 +6,28 @@ import { dom } from './dom.js';
 import { state } from '../core/state.js';
 import { getDisplayString } from '../chordDb.js';
 import { drawChordDiagram } from './diagram.js';
+import { parseChordStringToSlot } from '../core/patternToSong.js';
+
+// Diatonic Chords Map for 12 major keys (using highly practical enharmonic chords for guitar)
+const DIATONIC_MAP = {
+  "C": ["C", "Dm", "Em", "F", "G", "Am", "Bdim"],
+  "C#": ["Db", "Ebm", "Fm", "Gb", "Ab", "Bbm", "Cdim"],
+  "Db": ["Db", "Ebm", "Fm", "Gb", "Ab", "Bbm", "Cdim"],
+  "D": ["D", "Em", "F#m", "G", "A", "Bm", "C#dim"],
+  "D#": ["Eb", "Fm", "Gm", "Ab", "Bb", "Cm", "Ddim"],
+  "Eb": ["Eb", "Fm", "Gm", "Ab", "Bb", "Cm", "Ddim"],
+  "E": ["E", "F#m", "G#m", "A", "B", "C#m", "D#dim"],
+  "F": ["F", "Gm", "Am", "Bb", "C", "Dm", "Edim"],
+  "F#": ["F#", "G#m", "A#m", "B", "C#", "D#m", "Fdim"],
+  "Gb": ["Gb", "Abm", "Bbm", "Cb", "Db", "Ebm", "Fdim"],
+  "G": ["G", "Am", "Bm", "C", "D", "Em", "F#dim"],
+  "G#": ["Ab", "Bbm", "Cm", "Db", "Eb", "Fm", "Gdim"],
+  "Ab": ["Ab", "Bbm", "Cm", "Db", "Eb", "Fm", "Gdim"],
+  "A": ["A", "Bm", "C#m", "D", "E", "F#m", "G#dim"],
+  "A#": ["Bb", "Cm", "Dm", "Eb", "F", "Gm", "Adim"],
+  "Bb": ["Bb", "Cm", "Dm", "Eb", "F", "Gm", "Adim"],
+  "B": ["B", "C#m", "D#m", "E", "F#", "G#m", "A#dim"]
+};
 
 const ROOTS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 const QUALITIES = [
@@ -118,6 +140,9 @@ export function renderPicker() {
     }
   }
   
+  // Render Diatonic Quick recommendation chips
+  renderDiatonicChips(slot);
+  
   // Render subgrids
   if (dom.pickerRoots) {
     renderButtonGrid(dom.pickerRoots, ROOTS, slot.root, "root", (val) => {
@@ -212,4 +237,53 @@ function renderButtonGrid(container, list, activeValue, type, onSelect, isDisabl
 
 export function isPickerOpen() {
   return dom.modalOverlay && dom.modalOverlay.classList.contains("open");
+}
+
+function renderDiatonicChips(slot) {
+  if (!dom.diatonicChipsContainer) return;
+  dom.diatonicChipsContainer.innerHTML = "";
+
+  const key = state.currentKey || "C";
+  const diatonicChords = DIATONIC_MAP[key] || DIATONIC_MAP["C"];
+
+  diatonicChords.forEach(chordStr => {
+    const btn = document.createElement("button");
+    btn.className = "diatonic-chip font-mono";
+    btn.textContent = chordStr;
+    btn.disabled = slot.isContinue;
+
+    // Check if the current slot matches this diatonic chord
+    const parsed = parseChordStringToSlot(chordStr);
+    const isCurrent = slot.root === parsed.root &&
+                     slot.quality === parsed.quality &&
+                     slot.tension === parsed.tension &&
+                     slot.extension === parsed.extension &&
+                     !slot.isContinue;
+
+    if (isCurrent) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      if (callbacks.updateEditingSlot) {
+        callbacks.updateEditingSlot({
+          root: parsed.root,
+          quality: parsed.quality,
+          tension: parsed.tension,
+          extension: parsed.extension,
+          bassNote: null, // Clear bass note on quick recommended chord tap
+          isContinue: false
+        });
+        
+        // Sound preview on tap
+        if (callbacks.previewEditingChord) {
+          setTimeout(() => {
+            callbacks.previewEditingChord();
+          }, 50);
+        }
+      }
+    });
+
+    dom.diatonicChipsContainer.appendChild(btn);
+  });
 }

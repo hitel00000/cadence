@@ -53,7 +53,8 @@ export const dom = {
   closeDrawerBtn: null,
   librarySearch: null,
   categoryChips: null,
-  libraryPatternList: null
+  libraryPatternList: null,
+  diatonicChipsContainer: null
 };
 
 export function cacheDOMElements() {
@@ -102,6 +103,7 @@ export function cacheDOMElements() {
   dom.previewSoundBtn = document.getElementById("preview-sound-btn");
   dom.closeModalBtn = document.getElementById("close-modal-btn");
   dom.continueToggleBtn = document.getElementById("continue-toggle-btn");
+  dom.diatonicChipsContainer = document.getElementById("diatonic-chips-container");
   
   dom.pickerRoots = document.getElementById("picker-roots");
   dom.pickerQualities = document.getElementById("picker-qualities");

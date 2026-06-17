@@ -752,6 +752,50 @@ header .pulse-dot {
   box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
 }
 
+/* Diatonic Quick Recommendation Section */
+.diatonic-recommendation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-muted);
+  width: 100%;
+}
+
+.diatonic-chips-container {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.diatonic-chip {
+  flex-shrink: 0;
+  padding: 0.5rem 1.125rem;
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.diatonic-chip:hover:not(.active) {
+  background-color: var(--border);
+  border-color: var(--muted-foreground);
+}
+
+.diatonic-chip.active {
+  background-color: var(--primary-glow);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
 /* Accordion Header */
 .accordion-header {
   font-size: 0.75rem;
